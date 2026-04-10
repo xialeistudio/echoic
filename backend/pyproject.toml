@@ -1,0 +1,48 @@
+[project]
+name = "echoic-backend"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy",
+    "alembic",
+    "psycopg2-binary",
+    "python-multipart",
+    "pydantic-settings",
+    "httpx",
+    "soundfile",
+    # ASR
+    "faster-whisper==1.2.1",
+    "whisperx==3.7.2",
+    # Pronunciation scoring
+    "phonemizer",
+    "transformers",
+    "torch",
+    "python-levenshtein",
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchaudio = { index = "pytorch-cpu" }
+
+[[tool.uv.indexes]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-asyncio",
+    "httpx",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+markers = [
+    "slow: integration tests that load ML models (deselect with -m 'not slow')",
+]

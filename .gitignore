@@ -1,0 +1,14 @@
+.DS_Store
+__pycache__/
+.pytest_cache/
+
+backend/.env
+backend/.venv/
+backend/__pycache__/
+backend/storage/
+backend/static/
+
+frontend/node_modules/
+frontend/dist/
+
+.claude/

@@ -1,0 +1,42 @@
+import axios from 'axios'
+
+const api = axios.create({ baseURL: '/api' })
+
+export const audioApi = {
+  upload: (file, { compress = false } = {}) => {
+    const form = new FormData()
+    form.append('file', file)
+    return api.post(`/audio/upload?compress=${compress}`, form)
+  },
+  importFromUrl: (url, title, { compress = false } = {}) =>
+    api.post(`/audio/from-url?compress=${compress}`, { url, title }),
+  get: (audioFileId) => api.get(`/audio/${audioFileId}`),
+  list: () => api.get('/audio'),
+  rename: (audioFileId, title, language) => api.patch(`/audio/${audioFileId}`, { title, language }),
+  delete: (audioFileId) => api.delete(`/audio/${audioFileId}`),
+  streamUrl: (audioFileId) => `/api/audio/${audioFileId}/stream`,
+  getPhonemes: (audioFileId, sentenceIndex) =>
+    api.get(`/audio/${audioFileId}/sentence/${sentenceIndex}/phonemes`),
+  analyze: (audioFileId, sentenceIndex, { lang } = {}) =>
+    api.post(`/audio/${audioFileId}/sentence/${sentenceIndex}/analyze${lang ? `?lang=${lang}` : ''}`),
+  toggleBookmark: (audioFileId, sentenceIndex) =>
+    api.post(`/audio/${audioFileId}/sentence/${sentenceIndex}/bookmark`),
+}
+
+export const practiceApi = {
+  saveRecording: (audioFileId, sentenceIndex, blob) => {
+    const form = new FormData()
+    form.append('file', blob, 'recording.webm')
+    return api.post(`/practice/${audioFileId}/sentence/${sentenceIndex}/save`, form)
+  },
+  scoreRecording: (recordId) => api.post(`/practice/record/${recordId}/score`),
+  getHistory: (audioFileId, sentenceIndex) =>
+    api.get(`/practice/${audioFileId}/sentence/${sentenceIndex}/history`),
+  recordStreamUrl: (recordId) => `/api/practice/record/${recordId}/stream`,
+  deleteRecord: (recordId) => api.delete(`/practice/record/${recordId}`),
+}
+
+export const statsApi = {
+  getHeatmap: () => api.get('/stats/heatmap'),
+  getRecent: (limit = 20) => api.get(`/stats/recent?limit=${limit}`),
+}
