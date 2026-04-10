@@ -26,7 +26,7 @@ dependencies = [
 torch = { index = "pytorch-cpu" }
 torchaudio = { index = "pytorch-cpu" }
 
-[[tool.uv.indexes]]
+[[tool.uv.index]]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
 explicit = true
