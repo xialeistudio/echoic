@@ -114,7 +114,14 @@ export default function Practice() {
   const loopRef = useRef('sentence')
   const audioCacheRef = useRef(null)
   const origBlobRef = useRef(null)  // for download
+  const sentencesRef = useRef([])
+  const selectedSentenceRef = useRef(null)
+  const handleSelectRef = useRef(null)
+  const autoPlayOnReadyRef = useRef(false)
   useEffect(() => { loopRef.current = loopMode }, [loopMode])
+  useEffect(() => { sentencesRef.current = sentences }, [sentences])
+  useEffect(() => { selectedSentenceRef.current = selectedSentence }, [selectedSentence])
+  useEffect(() => { handleSelectRef.current = handleSelect })
 
   // ── Recording ──
   const [recPhase, setRecPhase] = useState('idle') // idle | recording | paused | recorded | submitting
@@ -147,7 +154,10 @@ export default function Practice() {
       barRadius: 3,
       normalize: true,
     })
-    ws.on('ready', () => { setOrigReady(true); setOrigDur(ws.getDuration()) })
+    ws.on('ready', () => {
+      setOrigReady(true)
+      setOrigDur(ws.getDuration())
+    })
     ws.on('play', () => setOrigPlaying(true))
     ws.on('pause', () => setOrigPlaying(false))
     ws.on('timeupdate', t => setOrigTime(t))
@@ -155,6 +165,17 @@ export default function Practice() {
       setOrigPlaying(false)
       if (loopRef.current === 'sentence') {
         ws.seekTo(0); ws.play()
+      } else if (loopRef.current === 'list') {
+        const cur = selectedSentenceRef.current
+        const sents = sentencesRef.current
+        if (cur && sents.length) {
+          const i = sents.findIndex(s => s.index === cur.index)
+          const next = sents[i + 1]
+          if (next) {
+            autoPlayOnReadyRef.current = true
+            handleSelectRef.current?.(next)
+          }
+        }
       }
     })
     origWsRef.current = ws
@@ -166,6 +187,8 @@ export default function Practice() {
     if (!origWsRef.current || !selectedSentence) return
     setOrigReady(false); setOrigTime(0); setOrigDur(0)
     origWsRef.current.pause()
+    const autoPlay = autoPlayOnReadyRef.current
+    autoPlayOnReadyRef.current = false
     getSegmentBlob(
       audioApi.streamUrl(audioFileId),
       selectedSentence.start,
@@ -173,7 +196,12 @@ export default function Practice() {
       audioCacheRef,
     ).then(blob => {
       origBlobRef.current = blob
-      origWsRef.current?.loadBlob(blob)
+      const ws = origWsRef.current
+      if (!ws) return
+      ws.loadBlob(blob)
+      if (autoPlay) {
+        const unsub = ws.on('ready', () => { unsub(); ws.play() })
+      }
     }).catch(console.error)
   }, [selectedSentence?.index, audioFileId])
 
@@ -204,23 +232,26 @@ export default function Practice() {
 
   // ── Live visualizer draw loop ──
   const drawLive = useCallback(() => {
+    animFrameRef.current = requestAnimationFrame(drawLive)
     const canvas = liveCanvasRef.current
     const ref = analyserRef.current
     if (!canvas || !ref) return
     const { analyser } = ref
-    const data = new Uint8Array(analyser.frequencyBinCount)
-    analyser.getByteFrequencyData(data)
+    const data = new Uint8Array(analyser.fftSize)
+    analyser.getByteTimeDomainData(data)
     const ctx = canvas.getContext('2d')
-    const w = canvas.width, h = canvas.height
+    const { width: w, height: h } = canvas
     ctx.clearRect(0, 0, w, h)
-    const bins = Math.min(data.length, 48)
-    const barW = w / bins
-    for (let i = 0; i < bins; i++) {
-      const barH = (data[i] / 255) * h
-      ctx.fillStyle = `rgba(253, 164, 175, ${0.4 + 0.6 * (data[i] / 255)})`
-      ctx.fillRect(i * barW, h - barH, barW - 1, barH)
+    const barW = 2, gap = 1, step = barW + gap
+    const numBars = Math.floor(w / step)
+    const sampleStep = Math.floor(data.length / numBars)
+    const cy = h / 2
+    for (let i = 0; i < numBars; i++) {
+      const v = Math.abs((data[i * sampleStep] ?? 128) - 128) / 128
+      const barH = Math.max(2, v * h)
+      ctx.fillStyle = `rgba(253, 164, 175, ${0.4 + 0.6 * v})`
+      ctx.fillRect(i * step, cy - barH / 2, barW, barH)
     }
-    animFrameRef.current = requestAnimationFrame(drawLive)
   }, [])
 
   function stopLiveViz() {
@@ -263,7 +294,22 @@ export default function Practice() {
   async function startRecording() {
     if (!selectedSentence) return
     setRecError(null)
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 16000, channelCount: 1 } })
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setRecError(t('practice.micNotSupported'))
+      return
+    }
+    let stream
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { sampleRate: { ideal: 16000 }, channelCount: { ideal: 1 } },
+      })
+    } catch (err) {
+      const msg = (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')
+        ? t('practice.micPermissionDenied')
+        : t('practice.micError')
+      setRecError(msg)
+      return
+    }
     recStreamRef.current = stream
 
     // Setup live visualizer
@@ -489,30 +535,7 @@ export default function Practice() {
   ]
 
   // ── Recording row actions ──
-  const recActions = (recPhase === 'recording' || recPhase === 'paused') ? [
-    <Tooltip key="stop">
-      <TooltipTrigger className={rowBtnCls} onClick={resetRec}>
-        <X className="size-4" />
-      </TooltipTrigger>
-      <TooltipContent side="left">{t('practice.discardRecording')}</TooltipContent>
-    </Tooltip>,
-    <Tooltip key="pause">
-      <TooltipTrigger
-        className={`${rowBtnCls} ${recPhase === 'paused' ? 'text-primary' : ''}`}
-        onClick={recPhase === 'paused' ? resumeRecording : pauseRecording}>
-        {recPhase === 'paused' ? <Play className="size-4" /> : <Pause className="size-4" />}
-      </TooltipTrigger>
-      <TooltipContent side="left">{recPhase === 'paused' ? t('practice.continueRecording') : t('practice.pause')}</TooltipContent>
-    </Tooltip>,
-    <Tooltip key="done">
-      <TooltipTrigger
-        className={`${rowBtnCls} text-primary hover:text-primary`}
-        onClick={finishRecording}>
-        <Check className="size-4" />
-      </TooltipTrigger>
-      <TooltipContent side="left">{t('practice.finishRecording')}</TooltipContent>
-    </Tooltip>,
-  ] : (recPhase === 'recorded' || recPhase === 'submitting') ? [
+  const recActions = (recPhase === 'recorded' || recPhase === 'submitting') ? [
     <Tooltip key="mic">
       <TooltipTrigger
         className={`${rowBtnCls} text-rose-400 hover:text-rose-500`}
@@ -563,9 +586,9 @@ return (
         </div>
 
         {/* Main panels */}
-        <div className="mx-4 mt-3 flex min-h-0 flex-1 overflow-hidden rounded-lg border border-border/40 bg-background flex-col md:flex-row">
+        <div className="mx-4 mt-3 flex min-h-0 flex-1 overflow-hidden rounded-lg border border-border/40 bg-background flex-row">
           {/* Left: sentence list */}
-          <section className="flex min-h-0 md:h-full basis-1/3 md:basis-2/5 flex-col border-b md:border-b-0 md:border-r border-border/40">
+          <section className="flex min-h-0 h-full basis-2/5 flex-col border-r border-border/40">
             <div className="flex items-center justify-between border-b border-border/30 px-3 py-2 shrink-0">
               <span className="text-sm font-medium">{t('practice.sentences')}</span>
               <span className="tabular-nums text-[11px] text-muted-foreground">
@@ -675,33 +698,60 @@ return (
         <div className="shrink-0 border-t border-border/30 bg-muted/5 px-5 py-3">
           <div className="space-y-2.5">
             {/* User recording row */}
-            <WaveformRow
-              detail={recPhase === 'recording' ? t('practice.recording') : recError ?? ''}
-              containerRef={userContainerRef}
-              actions={recActions}
-              emptyState={
-                recPhase === 'idle' ? (
-                  <button
-                    type="button"
-                    disabled={!selectedSentence}
-                    onClick={startRecording}
-                    className="flex h-full w-full flex-col items-center justify-center gap-1 disabled:opacity-40"
-                  >
-                    <Mic className="size-5 text-rose-400" />
-                    <p className="text-[11px] text-muted-foreground/60">
-                      {selectedSentence ? t('practice.clickToRecord') : t('practice.selectFirst')}
-                    </p>
-                  </button>
-                ) : (recPhase === 'recording' || recPhase === 'paused') ? (
-                  <canvas
-                    ref={liveCanvasRef}
-                    className={`h-full w-full transition-opacity ${recPhase === 'paused' ? 'opacity-40' : ''}`}
-                    width={600}
-                    height={52}
-                  />
-                ) : null
-              }
-            />
+            {(recPhase === 'recording' || recPhase === 'paused') ? (
+              <div className="min-h-[72px] flex items-center justify-center gap-3 overflow-hidden rounded-lg border border-border/30 bg-muted/5">
+                <canvas
+                  ref={liveCanvasRef}
+                  className={`shrink-0 transition-opacity ${recPhase === 'paused' ? 'opacity-40' : ''}`}
+                  width={160}
+                  height={40}
+                />
+                <div className="flex shrink-0 items-center gap-0.5">
+                  <Tooltip>
+                    <TooltipTrigger className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground" onClick={resetRec}>
+                      <X className="size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top">{t('practice.discardRecording')}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      className={`inline-flex size-7 items-center justify-center rounded-md transition-colors hover:bg-accent ${recPhase === 'paused' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                      onClick={recPhase === 'paused' ? resumeRecording : pauseRecording}>
+                      {recPhase === 'paused' ? <Play className="size-4" /> : <Pause className="size-4" />}
+                    </TooltipTrigger>
+                    <TooltipContent side="top">{recPhase === 'paused' ? t('practice.continueRecording') : t('practice.pause')}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger className="inline-flex size-7 items-center justify-center rounded-md text-primary transition-colors hover:bg-accent" onClick={finishRecording}>
+                      <Check className="size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top">{t('practice.finishRecording')}</TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+            ) : (
+              <WaveformRow
+                containerRef={userContainerRef}
+                actions={recActions}
+                emptyState={
+                  recPhase === 'idle' ? (
+                    recError ? (
+                      <button type="button" onClick={startRecording} className="flex h-full w-full flex-col items-center justify-center gap-1">
+                        <p className="text-[11px] font-medium text-red-500">{recError}</p>
+                        <p className="text-[10px] text-muted-foreground/60">{t('practice.tapToRetry')}</p>
+                      </button>
+                    ) : (
+                      <button type="button" disabled={!selectedSentence} onClick={startRecording} className="flex h-full w-full flex-col items-center justify-center gap-1 disabled:opacity-40">
+                        <Mic className="size-5 text-rose-400" />
+                        <p className="text-[11px] text-muted-foreground/60">
+                          {selectedSentence ? t('practice.clickToRecord') : t('practice.selectFirst')}
+                        </p>
+                      </button>
+                    )
+                  ) : null
+                }
+              />
+            )}
 
             {/* Original audio row */}
             <WaveformRow

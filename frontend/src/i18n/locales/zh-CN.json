@@ -69,6 +69,7 @@
     "fluency": "流利度",
     "completeness": "完整度",
     "recording": "录音中…",
+    "paused": "已暂停",
     "clickToRecord": "点击开始录音",
     "selectFirst": "请先选择句子",
     "loading": "加载中…",
@@ -83,8 +84,12 @@
     "assess": "发音评估",
     "downloadRecording": "下载录音",
     "loopSentence": "循环当前句",
-    "loopList": "循环列表",
-    "playbackSpeed": "播放速度"
+    "loopList": "自动跳下一句",
+    "playbackSpeed": "播放速度",
+    "micPermissionDenied": "麦克风权限被拒绝，请在系统设置中允许后重试",
+    "micError": "无法访问麦克风",
+    "micNotSupported": "当前环境不支持录音（需要 HTTPS 或 Safari 浏览器）",
+    "tapToRetry": "点击重试"
   },
   "score": {
     "title": "评分结果",

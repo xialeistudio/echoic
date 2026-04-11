@@ -18,8 +18,8 @@ export default function Layout({ children }) {
   return (
     <TooltipProvider>
       <div className="flex h-screen bg-background">
-        {/* Desktop sidebar */}
-        <aside className={`hidden md:flex shrink-0 bg-sidebar border-r border-sidebar-border flex-col p-3 gap-1 transition-[width] duration-200 ${collapsed ? 'w-[52px]' : 'w-[200px]'}`}>
+        {/* Sidebar */}
+        <aside className={`flex shrink-0 bg-sidebar border-r border-sidebar-border flex-col p-3 gap-1 transition-[width] duration-200 ${collapsed ? 'w-[52px]' : 'w-[200px]'}`}>
           <div className="flex items-center gap-2.5 px-2 py-3 overflow-hidden">
             <AudioWaveform className="w-5 h-5 shrink-0 text-primary" />
             {!collapsed && (
@@ -82,28 +82,9 @@ export default function Layout({ children }) {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto pb-14 md:pb-0">
+        <main className="flex-1 overflow-auto">
           {children}
         </main>
-
-        {/* Mobile bottom tab bar */}
-        <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-border bg-background/95 backdrop-blur-sm h-14">
-          {NAV.map(({ to, icon: Icon, key, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 text-[10px] transition-colors ${
-                  isActive ? 'text-primary' : 'text-muted-foreground'
-                }`
-              }
-            >
-              <Icon className="w-5 h-5" />
-              {t(key)}
-            </NavLink>
-          ))}
-        </nav>
       </div>
     </TooltipProvider>
   )

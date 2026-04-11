@@ -52,10 +52,10 @@ export default function SentenceList({ audioFileId, onSelect, onTitleLoad, selec
                 onClick={() => onSelect(sentence)}
                 onKeyDown={e => e.key === 'Enter' && onSelect(sentence)}
                 className={[
-                  'group flex w-full gap-2.5 bg-background px-3 py-2.5 text-left transition-colors border-b border-border/20 cursor-pointer',
+                  'group flex w-full gap-2.5 px-3 py-2.5 text-left transition-colors border-b border-border/20 cursor-pointer',
                   active
-                    ? 'bg-primary/[0.07] border-l-2 border-l-primary'
-                    : 'border-l-2 border-l-transparent hover:bg-muted/30',
+                    ? 'bg-accent border-l-2 border-l-primary'
+                    : 'bg-background border-l-2 border-l-transparent hover:bg-muted/30',
                 ].join(' ')}
               >
                 <div className="min-w-0 flex-1">

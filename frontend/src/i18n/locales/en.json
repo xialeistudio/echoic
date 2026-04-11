@@ -69,6 +69,7 @@
     "fluency": "Fluency",
     "completeness": "Completeness",
     "recording": "Recording…",
+    "paused": "Paused",
     "clickToRecord": "Click to record",
     "selectFirst": "Select a sentence first",
     "loading": "Loading…",
@@ -83,8 +84,12 @@
     "assess": "Assess",
     "downloadRecording": "Download recording",
     "loopSentence": "Loop sentence",
-    "loopList": "Loop list",
-    "playbackSpeed": "Speed"
+    "loopList": "Auto-advance",
+    "playbackSpeed": "Speed",
+    "micPermissionDenied": "Microphone permission denied — allow it in Settings and retry",
+    "micError": "Cannot access microphone",
+    "micNotSupported": "Recording not supported (HTTPS or Safari required)",
+    "tapToRetry": "Tap to retry"
   },
   "score": {
     "title": "Score",

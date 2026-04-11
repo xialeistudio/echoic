@@ -69,6 +69,7 @@
     "fluency": "流利度",
     "completeness": "完整度",
     "recording": "錄音中…",
+    "paused": "已暫停",
     "clickToRecord": "點擊開始錄音",
     "selectFirst": "請先選擇句子",
     "loading": "載入中…",
@@ -83,8 +84,12 @@
     "assess": "發音評估",
     "downloadRecording": "下載錄音",
     "loopSentence": "循環當前句",
-    "loopList": "循環列表",
-    "playbackSpeed": "播放速度"
+    "loopList": "自動跳下一句",
+    "playbackSpeed": "播放速度",
+    "micPermissionDenied": "麥克風權限被拒絕，請在系統設定中允許後重試",
+    "micError": "無法存取麥克風",
+    "micNotSupported": "目前環境不支援錄音（需要 HTTPS 或 Safari 瀏覽器）",
+    "tapToRetry": "點擊重試"
   },
   "score": {
     "title": "評分結果",
