@@ -28,7 +28,7 @@ WORKDIR /app/backend
 
 # Install Python dependencies — separate layer for cache efficiency
 COPY backend/pyproject.toml backend/uv.lock ./
-RUN uv sync --frozen --no-dev
+RUN uv sync --no-dev
 
 # Copy backend source and built frontend
 COPY backend/ .
