@@ -152,10 +152,12 @@ export default function AudioUpload({ onSuccess, collections = [] } = {}) {
                 <Label>{t('library.collection')}</Label>
                 <Select value={collectionId ? String(collectionId) : '0'} onValueChange={v => setCollectionId(v === '0' ? null : Number(v))}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <span className="truncate">
+                      {collectionId ? (collections.find(c => c.id === collectionId)?.name ?? t('library.defaultCollection')) : t('library.defaultCollection')}
+                    </span>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="0">{t('library.noCollection')}</SelectItem>
+                    <SelectItem value="0">{t('library.defaultCollection')}</SelectItem>
                     {collections.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -200,10 +202,12 @@ export default function AudioUpload({ onSuccess, collections = [] } = {}) {
                 <Label>{t('library.collection')}</Label>
                 <Select value={collectionId ? String(collectionId) : '0'} onValueChange={v => setCollectionId(v === '0' ? null : Number(v))}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <span className="truncate">
+                      {collectionId ? (collections.find(c => c.id === collectionId)?.name ?? t('library.defaultCollection')) : t('library.defaultCollection')}
+                    </span>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="0">{t('library.noCollection')}</SelectItem>
+                    <SelectItem value="0">{t('library.defaultCollection')}</SelectItem>
                     {collections.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>

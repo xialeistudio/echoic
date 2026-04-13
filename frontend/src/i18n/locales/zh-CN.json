@@ -48,7 +48,7 @@
     "renameCollection": "重命名合集",
     "deleteCollectionMsg": "删除合集「{{name}}」？其中的音频将移至全部音频。",
     "collection": "合集",
-    "noCollection": "不选"
+    "defaultCollection": "默认合集"
   },
   "upload": {
     "uploadFile": "上传文件",

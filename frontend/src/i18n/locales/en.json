@@ -48,7 +48,7 @@
     "renameCollection": "Rename Collection",
     "deleteCollectionMsg": "Delete \"{{name}}\"? Files will be moved to All Audio.",
     "collection": "Collection",
-    "noCollection": "None"
+    "defaultCollection": "Default"
   },
   "upload": {
     "uploadFile": "Upload File",
