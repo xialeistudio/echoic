@@ -1,14 +1,40 @@
 services:
   db:
     image: postgres:16
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: echoic
       POSTGRES_PASSWORD: echoic
       POSTGRES_DB: echoic
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U echoic"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql://echoic:echoic@db:5432/echoic
+      CORS_ORIGINS: '["http://localhost:8000"]'
+      ASR__WHISPERX__DEVICE: cpu
+      ASR__WHISPERX__COMPUTE_TYPE: int8
+      ALIGNMENT__WAV2VEC2__DEVICE: cpu
+      SCORING__PHONEME__DEVICE: cpu
+    volumes:
+      - hf_cache:/root/.cache/huggingface
+      - storage:/app/backend/storage
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:
+  hf_cache:
+  storage:

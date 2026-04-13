@@ -1,0 +1,14 @@
+# Python
+backend/.venv
+backend/__pycache__
+backend/**/__pycache__
+backend/storage
+
+# Frontend
+frontend/node_modules
+
+# Git
+.git
+
+# Misc
+.env

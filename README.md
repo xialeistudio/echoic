@@ -12,7 +12,7 @@
 - **Sentence Practice** — Practice each sentence with playback speed control
 - **Pronunciation Scoring** — Real-time accuracy, fluency, and completeness scores
 - **Phoneme Display** — Word-level IPA transcription for reference
-- **AI Sentence Analysis** — Translation and grammar breakdown via OpenAI (optional)
+- **AI Sentence Analysis** — Translation and grammar breakdown via OpenAI or local Ollama (optional)
 - **Practice History** — Track every attempt with scores per sentence
 - **Practice Heatmap** — 365-day visual activity overview
 - **Bookmarks** — Mark sentences for focused review
@@ -28,7 +28,53 @@
 | Scoring | wav2vec2 + phonemizer |
 | Database | PostgreSQL 16 |
 
-## Prerequisites
+## Quick Start (Docker)
+
+The easiest way to run Echoic. Only requires [Docker](https://docs.docker.com/get-docker/).
+
+```bash
+git clone https://github.com/xialeistudio/echoic.git
+cd echoic
+docker compose up
+```
+
+Open http://localhost:8000 in your browser.
+
+> **First run note:** The ASR and alignment models (~1 GB) are downloaded automatically on first use and cached in a Docker volume. Subsequent starts are instant.
+
+### Optional: AI Sentence Analysis
+
+To enable grammar analysis, create a `.env` file in the project root before running `docker compose up`:
+
+**Using OpenAI:**
+```env
+LLM__BACKEND=openai
+LLM__OPENAI__API_KEY=sk-...
+LLM__OPENAI__MODEL=gpt-4o-mini
+```
+
+**Using Ollama (local, no API key):**
+
+First install [Ollama](https://ollama.com) and pull a model:
+```bash
+ollama pull qwen3.5:2b
+```
+
+Then create `.env`:
+```env
+LLM__BACKEND=ollama
+LLM__OLLAMA__BASE_URL=http://host.docker.internal:11434
+LLM__OLLAMA__MODEL=qwen3.5:2b
+LLM__OLLAMA__NUM_CTX=512
+```
+
+> `host.docker.internal` lets the container reach Ollama running on your host machine. On Linux, use your host IP address instead.
+
+---
+
+## Manual Setup (without Docker)
+
+### Prerequisites
 
 - Python 3.11+
 - Node.js 20+ and pnpm
@@ -46,23 +92,23 @@ brew install ffmpeg espeak-ng postgresql@16
 sudo apt install ffmpeg espeak-ng postgresql
 ```
 
-## Quick Start
+### Steps
 
-### 1. Clone
+#### 1. Clone
 
 ```bash
 git clone https://github.com/xialeistudio/echoic.git
 cd echoic
 ```
 
-### 2. Database
+#### 2. Database
 
 ```bash
 # Start PostgreSQL via Docker (or use your own instance)
 make db
 ```
 
-### 3. Backend
+#### 3. Backend
 
 ```bash
 cd backend
@@ -80,7 +126,7 @@ uv run alembic upgrade head
 cd .. && make run
 ```
 
-### 4. Frontend (development only)
+#### 4. Frontend (development only)
 
 In a separate terminal:
 
@@ -140,9 +186,14 @@ Copy `backend/.env.example` to `backend/.env` and adjust as needed.
 
 | Variable | Default | Description |
 |---|---|---|
-| `LLM__OPENAI__API_KEY` | — | OpenAI API key (required for sentence analysis) |
-| `LLM__OPENAI__MODEL` | `gpt-4o-mini` | Model to use |
-| `LLM__OPENAI__BASE_URL` | `https://api.openai.com/v1` | API endpoint |
+| `LLM__BACKEND` | — | `openai` or `ollama` |
+| `LLM__OPENAI__API_KEY` | — | OpenAI API key |
+| `LLM__OPENAI__MODEL` | `gpt-4o-mini` | OpenAI model |
+| `LLM__OPENAI__BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible endpoint |
+| `LLM__OLLAMA__BASE_URL` | `http://localhost:11434` | Ollama server URL |
+| `LLM__OLLAMA__MODEL` | `llama3` | Ollama model name |
+| `LLM__OLLAMA__NUM_CTX` | `512` | Context window (512 is enough for sentence analysis) |
+| `LLM__OLLAMA__THINK` | `false` | Enable thinking mode for supported models (e.g. qwen3.5) |
 
 ## Development
 

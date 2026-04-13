@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-04-13
+
+### Added
+- Docker Compose support: `docker compose up` for one-command local deployment
+- Multi-stage Dockerfile (Node.js frontend build + Python backend)
+- HuggingFace model cache and storage persisted via Docker volumes
+
 ## [1.1.0] - 2026-04-13
 
 ### Added
