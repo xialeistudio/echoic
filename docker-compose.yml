@@ -27,6 +27,9 @@ services:
       ASR__WHISPERX__COMPUTE_TYPE: int8
       ALIGNMENT__WAV2VEC2__DEVICE: cpu
       SCORING__PHONEME__DEVICE: cpu
+      LLM__OLLAMA__BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - hf_cache:/root/.cache/huggingface
       - storage:/app/backend/storage
