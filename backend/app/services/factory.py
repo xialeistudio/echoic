@@ -43,6 +43,9 @@ def get_llm_service() -> LLMService:
         case "openai":
             from app.services.llm.openai import OpenAILLMService
             return OpenAILLMService(settings.llm.openai)
+        case "ollama":
+            from app.services.llm.ollama import OllamaLLMService
+            return OllamaLLMService(settings.llm.ollama)
         case _:
             raise ValueError(f"Unknown LLM backend: {settings.llm.backend}")
 

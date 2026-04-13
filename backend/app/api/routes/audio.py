@@ -220,7 +220,7 @@ async def analyze_sentence(
     sentence = _get_sentence_dict(audio_file, sentence_index)
     if sentence.get("analysis"):
         return {"analysis": sentence["analysis"]}
-    if not settings.llm.openai.api_key:
+    if settings.llm.backend == "openai" and not settings.llm.openai.api_key:
         raise HTTPException(status_code=503, detail="LLM not configured")
     analysis = llm.analyze(str(sentence.get("text", "")), reply_lang=lang)
     _update_sentence_field(db, audio_file, sentence_index, analysis=analysis)

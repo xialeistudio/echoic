@@ -263,11 +263,12 @@ export default function Practice() {
 
   // ── Sentence selection ──
   function handleSelect(sentence) {
-    setSelectedSentence(sentence)
+    const current = sentences.find(s => s.index === sentence.index) ?? sentence
+    setSelectedSentence(current)
     setResult(null)
     setCurrentRecordId(null)
     setPhonemes([])
-    setAnalysis(sentence.analysis ?? null)
+    setAnalysis(current.analysis ?? null)
     setHistory([])
     resetRec()
     audioApi.getPhonemes(audioFileId, sentence.index)
@@ -474,6 +475,9 @@ export default function Practice() {
     try {
       const { data } = await audioApi.analyze(audioFileId, selectedSentence.index, { lang: appSettings.nativeLang })
       setAnalysis(data.analysis)
+      setSentences(prev => prev.map(s =>
+        s.index === selectedSentence.index ? { ...s, analysis: data.analysis } : s
+      ))
     } finally {
       setAnalyzing(false)
     }

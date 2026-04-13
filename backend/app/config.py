@@ -54,9 +54,17 @@ class OpenAIConfig(BaseModel):
     base_url: str = "https://api.openai.com/v1"
 
 
+class OllamaConfig(BaseModel):
+    base_url: str = "http://localhost:11434"
+    model: str = "llama3"
+    num_ctx: int = 512          # context window; increase to 4096+ if think=True
+    think: bool = False         # enable qwen3.5 thinking mode (slower, higher quality)
+
+
 class LLMConfig(BaseModel):
     backend: str = "openai"
     openai: OpenAIConfig = OpenAIConfig()
+    ollama: OllamaConfig = OllamaConfig()
 
 
 # ── Storage ───────────────────────────────────────────────────────────────────
