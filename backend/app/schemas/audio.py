@@ -24,7 +24,7 @@ class Sentence(BaseModel):
 
 
 class AudioFileCreate(BaseModel):
-    title: str
+    title: str | None = None
     url: str | None = None
 
 

@@ -119,7 +119,7 @@ export default function AudioUpload({ onSuccess } = {}) {
               <Input
                 id="audio-url"
                 type="url"
-                placeholder="https://youtube.com/watch?v=... or https://example.com/audio.mp3"
+                placeholder="https://youtube.com/watch?v=..."
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
               />

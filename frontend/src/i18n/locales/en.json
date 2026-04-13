@@ -50,9 +50,9 @@
     "dragOrClick_click": "click to select",
     "compress": "Compress audio",
     "upload": "Upload",
-    "audioUrl": "Audio URL",
+    "audioUrl": "URL (YouTube, TED, direct audio links, and more)",
     "titleLabel": "Title",
-    "optional": " (optional)",
+    "optional": " (optional, auto-detected from YouTube)",
     "audioTitle": "Audio title",
     "import": "Import",
     "failedGeneric": "Operation failed"
