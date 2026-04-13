@@ -46,6 +46,12 @@ class ScoringConfig(BaseModel):
     phoneme: PhonemeScoringConfig = PhonemeScoringConfig()
 
 
+# ── yt-dlp ───────────────────────────────────────────────────────────────────
+
+class YtDlpConfig(BaseModel):
+    cookies_from_browser: str = ""  # chrome | firefox | safari | edge — leave empty to skip
+
+
 # ── LLM ──────────────────────────────────────────────────────────────────────
 
 class OpenAIConfig(BaseModel):
@@ -93,6 +99,7 @@ class Settings(BaseSettings):
     scoring: ScoringConfig = ScoringConfig()
     storage: StorageConfig = StorageConfig()
     llm: LLMConfig = LLMConfig()
+    ytdlp: YtDlpConfig = YtDlpConfig()
 
 
 settings = Settings()

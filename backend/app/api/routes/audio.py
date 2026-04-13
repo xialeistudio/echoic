@@ -29,14 +29,15 @@ router = APIRouter()
 def _ytdlp_download(url: str) -> tuple[bytes, str | None]:
     """Download audio via yt-dlp. Supports YouTube, direct links, and 1000+ sites."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        out = os.path.join(tmpdir, "audio.%(ext)s")
         ydl_opts = {
             "format": "bestaudio/best",
-            "outtmpl": out,
+            "outtmpl": os.path.join(tmpdir, "audio.%(ext)s"),
             "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "128"}],
             "quiet": True,
             "no_warnings": True,
         }
+        if settings.ytdlp.cookies_from_browser:
+            ydl_opts["cookiesfrombrowser"] = (settings.ytdlp.cookies_from_browser,)
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             title = info.get("title")
