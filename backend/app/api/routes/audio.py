@@ -1,10 +1,12 @@
+import asyncio
+import os
 import subprocess
 import tempfile
 from pathlib import Path
 from urllib.parse import urlparse
 from uuid import uuid4
 
-import httpx
+import yt_dlp
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 from fastapi.responses import FileResponse
@@ -24,11 +26,22 @@ from app.services.storage.base import StorageService
 router = APIRouter()
 
 
-async def _download_url(url: str) -> bytes:
-    async with httpx.AsyncClient(follow_redirects=True, timeout=60.0) as client:
-        async with client.stream("GET", url) as response:
-            response.raise_for_status()
-            return await response.aread()
+def _ytdlp_download(url: str) -> tuple[bytes, str | None]:
+    """Download audio via yt-dlp. Supports YouTube, direct links, and 1000+ sites."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        out = os.path.join(tmpdir, "audio.%(ext)s")
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": out,
+            "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "128"}],
+            "quiet": True,
+            "no_warnings": True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            title = info.get("title")
+        with open(os.path.join(tmpdir, "audio.mp3"), "rb") as f:
+            return f.read(), title
 
 
 def _audio_key(filename: str, *, compressed: bool = False) -> str:
@@ -112,15 +125,20 @@ async def import_from_url(
     if not payload.url:
         raise HTTPException(status_code=400, detail="url is required")
 
-    filename = Path(urlparse(payload.url).path).name or "imported.bin"
-    key = _audio_key(filename)
-    storage.save(await _download_url(payload.url), key)
+    try:
+        audio_bytes, extracted_title = await asyncio.to_thread(_ytdlp_download, payload.url)
+    except yt_dlp.utils.DownloadError as e:
+        raise HTTPException(status_code=422, detail=f"Could not download audio: {e}")
+
+    key = _audio_key("audio.mp3")
+    storage.save(audio_bytes, key)
     sentences = asr.transcribe(storage.get_absolute_path(key))
     if compress:
         key = _compress_audio(storage, key)
+    title = payload.title or extracted_title or urlparse(payload.url).hostname or "imported"
     return _persist_audio_file(
         db,
-        title=payload.title,
+        title=title,
         source_type="url",
         key=key,
         sentences=sentences,

@@ -119,7 +119,7 @@ export default function AudioUpload({ onSuccess } = {}) {
               <Input
                 id="audio-url"
                 type="url"
-                placeholder="https://example.com/audio.mp3"
+                placeholder="https://youtube.com/watch?v=... or https://example.com/audio.mp3"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
               />
@@ -129,7 +129,7 @@ export default function AudioUpload({ onSuccess } = {}) {
               <Input
                 id="audio-title"
                 type="text"
-                placeholder={t('upload.audioTitle')}
+                placeholder={t('upload.audioTitle') || 'Auto-detected from YouTube'}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
