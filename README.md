@@ -150,7 +150,7 @@ Copy `backend/.env.example` to `backend/.env` and adjust as needed.
 
 | Variable | Default | Description |
 |---|---|---|
-| `DATABASE_URL` | `postgresql://echoic:echoic@localhost:5432/echoic` | PostgreSQL connection string |
+| `DATABASE_URL` | `postgresql://echoic:echoic@localhost:5433/echoic` | PostgreSQL connection string (5433 avoids conflict with a local postgres) |
 | `CORS_ORIGINS` | `["http://localhost:5173"]` | Allowed CORS origins (JSON array) |
 
 ### ASR
@@ -198,14 +198,32 @@ Copy `backend/.env.example` to `backend/.env` and adjust as needed.
 ## Development
 
 ```bash
-# Backend (with hot reload)
+# Terminal 1 — database (exposed on localhost:5433, won't conflict with a local postgres)
+docker compose up db
+
+# Terminal 2 — backend with hot reload
 make dev-backend
 
-# Frontend (with HMR)
+# Terminal 3 — frontend with HMR
 make dev-frontend
 ```
 
-The frontend dev server proxies `/api` requests to `http://localhost:8000`.
+Open http://localhost:5173. The frontend dev server proxies `/api` to the backend.
+
+Create `docker-compose.override.yml` to expose the database port (not committed to git):
+
+```yaml
+services:
+  db:
+    ports:
+      - "5433:5432"
+```
+
+Then set `DATABASE_URL` in `backend/.env`:
+
+```env
+DATABASE_URL=postgresql://echoic:echoic@localhost:5433/echoic
+```
 
 ## License
 
