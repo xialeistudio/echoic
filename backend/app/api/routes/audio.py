@@ -31,7 +31,7 @@ def _ytdlp_download(url: str) -> tuple[bytes, str | None]:
     """Download audio via yt-dlp. Supports YouTube, direct links, and 1000+ sites."""
     with tempfile.TemporaryDirectory() as tmpdir:
         ydl_opts = {
-            "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best",
+            "format": "bestaudio/best",
             "outtmpl": os.path.join(tmpdir, "audio.%(ext)s"),
             "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "128"}],
             "quiet": True,
