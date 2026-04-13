@@ -150,12 +150,12 @@ export default function AudioUpload({ onSuccess, collections = [] } = {}) {
             {collections.length > 0 && (
               <div className="flex flex-col gap-1.5">
                 <Label>{t('library.collection')}</Label>
-                <Select value={collectionId ? String(collectionId) : 'none'} onValueChange={v => setCollectionId(v === 'none' ? null : Number(v))}>
+                <Select value={collectionId ? String(collectionId) : '0'} onValueChange={v => setCollectionId(v === '0' ? null : Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">{t('library.noCollection')}</SelectItem>
+                    <SelectItem value="0">{t('library.noCollection')}</SelectItem>
                     {collections.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -198,12 +198,12 @@ export default function AudioUpload({ onSuccess, collections = [] } = {}) {
             {collections.length > 0 && (
               <div className="flex flex-col gap-1.5">
                 <Label>{t('library.collection')}</Label>
-                <Select value={collectionId ? String(collectionId) : 'none'} onValueChange={v => setCollectionId(v === 'none' ? null : Number(v))}>
+                <Select value={collectionId ? String(collectionId) : '0'} onValueChange={v => setCollectionId(v === '0' ? null : Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">{t('library.noCollection')}</SelectItem>
+                    <SelectItem value="0">{t('library.noCollection')}</SelectItem>
                     {collections.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
