@@ -35,6 +35,8 @@ def _ytdlp_download(url: str) -> tuple[bytes, str | None]:
             "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "128"}],
             "quiet": True,
             "no_warnings": True,
+            "noplaylist": True,
+            "extractor_args": {"youtubetab": {"skip": ["authcheck"]}},
         }
         if settings.ytdlp.cookies_from_browser:
             ydl_opts["cookiesfrombrowser"] = (settings.ytdlp.cookies_from_browser,)
