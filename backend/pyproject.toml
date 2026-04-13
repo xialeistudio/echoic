@@ -21,7 +21,6 @@ dependencies = [
     "torch",
     "torchaudio",
     "python-levenshtein",
-    "yt-dlp",
 ]
 
 [tool.uv.sources]

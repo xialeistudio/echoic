@@ -1,13 +1,12 @@
 import asyncio
 import json
-import os
 import subprocess
 import tempfile
 from pathlib import Path
 from urllib.parse import urlparse
 from uuid import uuid4
 
-import yt_dlp
+import httpx
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
@@ -27,24 +26,11 @@ from app.services.storage.base import StorageService
 router = APIRouter()
 
 
-def _ytdlp_download(url: str) -> tuple[bytes, str | None]:
-    """Download audio via yt-dlp. Supports YouTube, direct links, and 1000+ sites."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        ydl_opts = {
-            "outtmpl": os.path.join(tmpdir, "audio.%(ext)s"),
-            "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "128"}],
-            "quiet": True,
-            "no_warnings": True,
-            "noplaylist": True,
-            "extractor_args": {"youtubetab": {"skip": ["authcheck"]}},
-        }
-        if settings.ytdlp.cookies_from_browser:
-            ydl_opts["cookiesfrombrowser"] = (settings.ytdlp.cookies_from_browser,)
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            title = info.get("title")
-        with open(os.path.join(tmpdir, "audio.mp3"), "rb") as f:
-            return f.read(), title
+async def _download_url(url: str) -> bytes:
+    async with httpx.AsyncClient(follow_redirects=True, timeout=300.0) as client:
+        async with client.stream("GET", url) as response:
+            response.raise_for_status()
+            return await response.aread()
 
 
 def _audio_key(filename: str, *, compressed: bool = False) -> str:
@@ -135,13 +121,14 @@ async def import_from_url(
         try:
             yield event({"step": "downloading"})
             try:
-                audio_bytes, extracted_title = await asyncio.to_thread(_ytdlp_download, payload.url)
-            except yt_dlp.utils.DownloadError as e:
+                audio_bytes = await _download_url(payload.url)
+            except httpx.HTTPError as e:
                 yield event({"step": "error", "message": str(e)})
                 return
 
             yield event({"step": "saving"})
-            key = _audio_key("audio.mp3")
+            filename = Path(urlparse(payload.url).path).name or "imported.mp3"
+            key = _audio_key(filename)
             storage.save(audio_bytes, key)
 
             if compress:
@@ -151,7 +138,7 @@ async def import_from_url(
             yield event({"step": "transcribing"})
             sentences = await asyncio.to_thread(asr.transcribe, storage.get_absolute_path(key))
 
-            title = payload.title or extracted_title or urlparse(payload.url).hostname or "imported"
+            title = payload.title or Path(filename).stem or urlparse(payload.url).hostname or "imported"
             audio_file = _persist_audio_file(
                 db, title=title, source_type="url", key=key,
                 sentences=sentences, language=settings.asr.whisperx.language,
