@@ -26,6 +26,7 @@ class Sentence(BaseModel):
 class AudioFileCreate(BaseModel):
     title: str | None = None
     url: str | None = None
+    collection_id: int | None = None
 
 
 class AudioFileResponse(BaseModel):
@@ -33,6 +34,7 @@ class AudioFileResponse(BaseModel):
     title: str
     source_type: str
     language: str
+    collection_id: int | None = None
     sentences: list[Sentence] | None
     practice_count: int = 0
     created_at: datetime

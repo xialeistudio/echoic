@@ -3,7 +3,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from app.config import settings
 from app.db import Base
-from app.models import audio_file, practice_record  # noqa: ensure models are registered
+from app.models import audio_file, practice_record, collection  # noqa: ensure models are registered
 
 config = context.config
 if config.config_file_name is not None and config.get_section("formatters") is not None:

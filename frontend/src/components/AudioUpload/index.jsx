@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select'
 
 function extractError(err, fallback) {
   const detail = err.response?.data?.detail
@@ -16,7 +19,7 @@ function extractError(err, fallback) {
   return err.message ?? fallback
 }
 
-export default function AudioUpload({ onSuccess } = {}) {
+export default function AudioUpload({ onSuccess, collections = [] } = {}) {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -25,6 +28,7 @@ export default function AudioUpload({ onSuccess } = {}) {
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
   const [compress, setCompress] = useState(true)
+  const [collectionId, setCollectionId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [importStep, setImportStep] = useState(null)
   const [error, setError] = useState(null)
@@ -43,7 +47,7 @@ export default function AudioUpload({ onSuccess } = {}) {
     setLoading(true)
     setError(null)
     try {
-      const { data } = await audioApi.upload(file, { compress })
+      const { data } = await audioApi.upload(file, { compress, collectionId })
       onSuccess ? onSuccess(data) : navigate(`/speaking/${data.id}`)
     } catch (err) {
       setError(extractError(err, t('upload.failedGeneric')))
@@ -68,7 +72,7 @@ export default function AudioUpload({ onSuccess } = {}) {
       const resp = await fetch(`/api/audio/from-url?compress=${compress}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, title: title || undefined }),
+        body: JSON.stringify({ url, title: title || undefined, collection_id: collectionId || null }),
       })
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}))
@@ -143,6 +147,20 @@ export default function AudioUpload({ onSuccess } = {}) {
                 </Label>
               </div>
             </div>
+            {collections.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <Label>{t('library.collection')}</Label>
+                <Select value={collectionId ? String(collectionId) : 'none'} onValueChange={v => setCollectionId(v === 'none' ? null : Number(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t('library.noCollection')}</SelectItem>
+                    {collections.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <Button onClick={handleUpload} disabled={!file || loading}>
               {loading ? <Loader2 className="size-4 animate-spin" /> : t('upload.upload')}
             </Button>
@@ -177,6 +195,20 @@ export default function AudioUpload({ onSuccess } = {}) {
                 {t('upload.compress')}
               </Label>
             </div>
+            {collections.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <Label>{t('library.collection')}</Label>
+                <Select value={collectionId ? String(collectionId) : 'none'} onValueChange={v => setCollectionId(v === 'none' ? null : Number(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t('library.noCollection')}</SelectItem>
+                    {collections.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <Button onClick={handleImport} disabled={!url || loading}>
               {loading ? (
                 <span className="flex items-center gap-2">

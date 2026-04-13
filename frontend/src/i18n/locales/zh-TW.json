@@ -41,7 +41,14 @@
     "duration": "時長",
     "practiceCount": "練習次數",
     "updatedAt": "更新時間",
-    "actions": "操作"
+    "actions": "操作",
+    "collections": "合集",
+    "allAudio": "全部音訊",
+    "newCollection": "新合集名稱",
+    "renameCollection": "重新命名合集",
+    "deleteCollectionMsg": "刪除合集「{{name}}」？其中的音訊將移至全部音訊。",
+    "collection": "合集",
+    "noCollection": "不選"
   },
   "upload": {
     "uploadFile": "上傳檔案",

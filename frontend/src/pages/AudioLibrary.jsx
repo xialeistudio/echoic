@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, LayoutGrid, List, Pencil, Trash2, RotateCcw } from 'lucide-react'
+import { Plus, Search, LayoutGrid, List, Pencil, Trash2, RotateCcw, FolderOpen, FolderPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,7 +18,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { audioApi } from '@/api'
+import { audioApi, collectionApi } from '@/api'
 import AudioUpload from '../components/AudioUpload'
 
 const LANGUAGES = [
@@ -62,6 +62,15 @@ export default function AudioLibrary() {
   const [view, setView] = useState('list')
   const [showUpload, setShowUpload] = useState(false)
 
+  // Collections
+  const [collections, setCollections] = useState([])
+  const [activeCollection, setActiveCollection] = useState(null) // null = all
+  const [newColName, setNewColName] = useState('')
+  const [showNewCol, setShowNewCol] = useState(false)
+  const [editCol, setEditCol] = useState(null)
+  const [editColName, setEditColName] = useState('')
+  const [deleteCol, setDeleteCol] = useState(null)
+
   // Edit dialog
   const [editFile, setEditFile] = useState(null)
   const [editTitle, setEditTitle] = useState('')
@@ -73,11 +82,38 @@ export default function AudioLibrary() {
 
   const navigate = useNavigate()
 
+  function loadCollections() {
+    collectionApi.list().then(r => setCollections(r.data)).catch(() => {})
+  }
+
   function load() {
     audioApi.list().then(r => setFiles(r.data)).catch(() => {})
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load(); loadCollections() }, [])
+
+  async function createCollection() {
+    if (!newColName.trim()) return
+    await collectionApi.create(newColName.trim()).catch(() => {})
+    setNewColName('')
+    setShowNewCol(false)
+    loadCollections()
+  }
+
+  async function commitRenameCol() {
+    if (!editColName.trim()) return
+    await collectionApi.rename(editCol.id, editColName.trim()).catch(() => {})
+    setEditCol(null)
+    loadCollections()
+  }
+
+  async function confirmDeleteCol() {
+    await collectionApi.delete(deleteCol.id).catch(() => {})
+    if (activeCollection === deleteCol.id) setActiveCollection(null)
+    setDeleteCol(null)
+    loadCollections()
+    load()
+  }
 
   function handleUploaded() {
     setShowUpload(false)
@@ -117,9 +153,57 @@ export default function AudioLibrary() {
 
   const filtered = files
     .filter(f => f.title.toLowerCase().includes(appliedSearch.toLowerCase()))
+    .filter(f => activeCollection === null ? true : f.collection_id === activeCollection)
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full">
+      {/* Collection sidebar */}
+      <div className="hidden md:flex flex-col w-44 shrink-0 border-r h-full overflow-y-auto">
+        <div className="flex items-center justify-between px-3 pt-3 pb-1">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('library.collections')}</span>
+          <button onClick={() => setShowNewCol(v => !v)} className="text-muted-foreground hover:text-foreground">
+            <FolderPlus className="w-3.5 h-3.5" />
+          </button>
+        </div>
+        {showNewCol && (
+          <div className="px-2 pb-2 flex gap-1">
+            <Input
+              autoFocus
+              className="h-7 text-xs"
+              placeholder={t('library.newCollection')}
+              value={newColName}
+              onChange={e => setNewColName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') createCollection(); if (e.key === 'Escape') setShowNewCol(false) }}
+            />
+          </div>
+        )}
+        <button
+          onClick={() => setActiveCollection(null)}
+          className={`flex items-center gap-2 px-3 py-1.5 text-sm text-left w-full transition-colors ${activeCollection === null ? 'bg-accent text-accent-foreground font-medium' : 'hover:bg-muted/50 text-muted-foreground'}`}
+        >
+          <FolderOpen className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">{t('library.allAudio')}</span>
+        </button>
+        {collections.map(col => (
+          <div key={col.id} className={`group flex items-center gap-1 px-3 py-1.5 text-sm transition-colors cursor-pointer ${activeCollection === col.id ? 'bg-accent text-accent-foreground font-medium' : 'hover:bg-muted/50 text-muted-foreground'}`}
+            onClick={() => setActiveCollection(col.id)}>
+            <FolderOpen className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate flex-1">{col.name}</span>
+            <div className="hidden group-hover:flex items-center gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
+              <button onClick={() => { setEditCol(col); setEditColName(col.name) }} className="p-0.5 rounded hover:bg-background/50">
+                <Pencil className="w-3 h-3" />
+              </button>
+              <button onClick={() => setDeleteCol(col)} className="p-0.5 rounded hover:bg-background/50 text-destructive">
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Main content */}
+      <div className="flex flex-col flex-1 min-w-0">
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2 px-4 md:px-6 py-3 border-b">
         {/* View toggle - desktop only */}
@@ -181,7 +265,7 @@ export default function AudioLibrary() {
           <DialogHeader>
             <DialogTitle>{t('library.addAudio')}</DialogTitle>
           </DialogHeader>
-          <AudioUpload onSuccess={handleUploaded} />
+          <AudioUpload onSuccess={handleUploaded} collections={collections} />
         </DialogContent>
       </Dialog>
 
@@ -236,6 +320,33 @@ export default function AudioLibrary() {
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-white hover:bg-destructive/90">
               {t('library.delete')}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Collection rename dialog */}
+      <Dialog open={!!editCol} onOpenChange={open => { if (!open) setEditCol(null) }}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader><DialogTitle>{t('library.renameCollection')}</DialogTitle></DialogHeader>
+          <Input autoFocus value={editColName} onChange={e => setEditColName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && commitRenameCol()} />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditCol(null)}>{t('library.cancel')}</Button>
+            <Button onClick={commitRenameCol}>{t('library.save')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Collection delete dialog */}
+      <AlertDialog open={!!deleteCol} onOpenChange={open => { if (!open) setDeleteCol(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('library.confirmDelete')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('library.deleteCollectionMsg', { name: deleteCol?.name })}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('library.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCol} className="bg-destructive text-white hover:bg-destructive/90">{t('library.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -334,6 +445,7 @@ export default function AudioLibrary() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   )

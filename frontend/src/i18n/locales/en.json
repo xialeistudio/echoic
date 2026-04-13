@@ -41,7 +41,14 @@
     "duration": "Duration",
     "practiceCount": "Practices",
     "updatedAt": "Updated",
-    "actions": "Actions"
+    "actions": "Actions",
+    "collections": "Collections",
+    "allAudio": "All Audio",
+    "newCollection": "New collection name",
+    "renameCollection": "Rename Collection",
+    "deleteCollectionMsg": "Delete \"{{name}}\"? Files will be moved to All Audio.",
+    "collection": "Collection",
+    "noCollection": "None"
   },
   "upload": {
     "uploadFile": "Upload File",

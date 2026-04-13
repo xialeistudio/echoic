@@ -3,13 +3,15 @@ import axios from 'axios'
 const api = axios.create({ baseURL: '/api' })
 
 export const audioApi = {
-  upload: (file, { compress = false } = {}) => {
+  upload: (file, { compress = false, collectionId = null } = {}) => {
     const form = new FormData()
     form.append('file', file)
-    return api.post(`/audio/upload?compress=${compress}`, form)
+    const params = new URLSearchParams({ compress })
+    if (collectionId) params.set('collection_id', collectionId)
+    return api.post(`/audio/upload?${params}`, form)
   },
-  importFromUrl: (url, title, { compress = false } = {}) =>
-    api.post(`/audio/from-url?compress=${compress}`, { url, title }),
+  importFromUrl: (url, title, { compress = false, collectionId = null } = {}) =>
+    api.post(`/audio/from-url?compress=${compress}`, { url, title, collection_id: collectionId || null }),
   get: (audioFileId) => api.get(`/audio/${audioFileId}`),
   list: () => api.get('/audio'),
   rename: (audioFileId, title, language) => api.patch(`/audio/${audioFileId}`, { title, language }),
@@ -34,6 +36,13 @@ export const practiceApi = {
     api.get(`/practice/${audioFileId}/sentence/${sentenceIndex}/history`),
   recordStreamUrl: (recordId) => `/api/practice/record/${recordId}/stream`,
   deleteRecord: (recordId) => api.delete(`/practice/record/${recordId}`),
+}
+
+export const collectionApi = {
+  list: () => api.get('/collections'),
+  create: (name) => api.post('/collections', { name }),
+  rename: (id, name) => api.put(`/collections/${id}`, { name }),
+  delete: (id) => api.delete(`/collections/${id}`),
 }
 
 export const statsApi = {

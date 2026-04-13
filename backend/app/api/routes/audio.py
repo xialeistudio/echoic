@@ -64,11 +64,13 @@ def _persist_audio_file(
     key: str,
     sentences,
     language: str = "en",
+    collection_id: int | None = None,
 ) -> AudioFile:
     audio_file = AudioFile(
         title=title,
         source_type=source_type,
         language=language,
+        collection_id=collection_id,
         storage_backend=settings.storage.backend,
         file_path=key,
         sentences=[sentence.model_dump() for sentence in sentences],
@@ -83,6 +85,7 @@ def _persist_audio_file(
 async def upload_audio(
     file: UploadFile = File(...),
     compress: bool = Query(False),
+    collection_id: int | None = Query(None),
     db: Session = Depends(get_db),
     asr: ASRService = Depends(get_asr_service),
     storage: StorageService = Depends(get_storage_service),
@@ -100,6 +103,7 @@ async def upload_audio(
         key=key,
         sentences=sentences,
         language=settings.asr.whisperx.language,
+        collection_id=collection_id,
     )
 
 
@@ -142,6 +146,7 @@ async def import_from_url(
             audio_file = _persist_audio_file(
                 db, title=title, source_type="url", key=key,
                 sentences=sentences, language=settings.asr.whisperx.language,
+                collection_id=payload.collection_id,
             )
             result = AudioFileResponse.model_validate(audio_file)
             yield event({"step": "done", "result": result.model_dump(mode="json")})
