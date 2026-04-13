@@ -26,6 +26,7 @@ export default function AudioUpload({ onSuccess } = {}) {
   const [title, setTitle] = useState('')
   const [compress, setCompress] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [importStep, setImportStep] = useState(null)
   const [error, setError] = useState(null)
 
   const inputRef = useRef(null)
@@ -51,17 +52,53 @@ export default function AudioUpload({ onSuccess } = {}) {
     }
   }
 
+  const STEP_LABELS = {
+    downloading: t('upload.stepDownloading'),
+    saving: t('upload.stepSaving'),
+    compressing: t('upload.stepCompressing'),
+    transcribing: t('upload.stepTranscribing'),
+  }
+
   async function handleImport() {
     if (!url) return
     setLoading(true)
+    setImportStep(null)
     setError(null)
     try {
-      const { data } = await audioApi.importFromUrl(url, title || undefined, { compress })
-      onSuccess ? onSuccess(data) : navigate(`/speaking/${data.id}`)
+      const resp = await fetch(`/api/audio/from-url?compress=${compress}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, title: title || undefined }),
+      })
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}))
+        throw new Error(err.detail || t('upload.failedGeneric'))
+      }
+      const reader = resp.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop()
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          const data = JSON.parse(line.slice(6))
+          if (data.step === 'error') throw new Error(data.message)
+          if (data.step === 'done') {
+            onSuccess ? onSuccess(data.result) : navigate(`/speaking/${data.result.id}`)
+            return
+          }
+          setImportStep(STEP_LABELS[data.step] ?? data.step)
+        }
+      }
     } catch (err) {
-      setError(extractError(err, t('upload.failedGeneric')))
+      setError(err.message || t('upload.failedGeneric'))
     } finally {
       setLoading(false)
+      setImportStep(null)
     }
   }
 
@@ -141,7 +178,12 @@ export default function AudioUpload({ onSuccess } = {}) {
               </Label>
             </div>
             <Button onClick={handleImport} disabled={!url || loading}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : t('upload.import')}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="size-4 animate-spin" />
+                  {importStep || t('upload.import')}
+                </span>
+              ) : t('upload.import')}
             </Button>
           </div>
         </TabsContent>

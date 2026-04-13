@@ -55,7 +55,11 @@
     "optional": "（可选，YouTube 自动获取）",
     "audioTitle": "音频标题",
     "import": "导入",
-    "failedGeneric": "操作失败"
+    "failedGeneric": "操作失败",
+    "stepDownloading": "下载音频中…",
+    "stepSaving": "处理音频中…",
+    "stepCompressing": "压缩音频中…",
+    "stepTranscribing": "语音转文字中（较长音频需要几分钟）…"
   },
   "practice": {
     "sentences": "句子",

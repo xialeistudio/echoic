@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import subprocess
 import tempfile
@@ -8,8 +9,8 @@ from uuid import uuid4
 
 import yt_dlp
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
-from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -30,7 +31,7 @@ def _ytdlp_download(url: str) -> tuple[bytes, str | None]:
     """Download audio via yt-dlp. Supports YouTube, direct links, and 1000+ sites."""
     with tempfile.TemporaryDirectory() as tmpdir:
         ydl_opts = {
-            "format": "bestaudio/best",
+            "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best",
             "outtmpl": os.path.join(tmpdir, "audio.%(ext)s"),
             "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "128"}],
             "quiet": True,
@@ -117,7 +118,7 @@ async def upload_audio(
     )
 
 
-@router.post("/from-url", response_model=AudioFileResponse)
+@router.post("/from-url")
 async def import_from_url(
     payload: AudioFileCreate,
     compress: bool = Query(False),
@@ -128,25 +129,40 @@ async def import_from_url(
     if not payload.url:
         raise HTTPException(status_code=400, detail="url is required")
 
-    try:
-        audio_bytes, extracted_title = await asyncio.to_thread(_ytdlp_download, payload.url)
-    except yt_dlp.utils.DownloadError as e:
-        raise HTTPException(status_code=422, detail=f"Could not download audio: {e}")
+    def event(data: dict) -> str:
+        return f"data: {json.dumps(data)}\n\n"
 
-    key = _audio_key("audio.mp3")
-    storage.save(audio_bytes, key)
-    sentences = asr.transcribe(storage.get_absolute_path(key))
-    if compress:
-        key = _compress_audio(storage, key)
-    title = payload.title or extracted_title or urlparse(payload.url).hostname or "imported"
-    return _persist_audio_file(
-        db,
-        title=title,
-        source_type="url",
-        key=key,
-        sentences=sentences,
-        language=settings.asr.whisperx.language,
-    )
+    async def generate():
+        try:
+            yield event({"step": "downloading"})
+            try:
+                audio_bytes, extracted_title = await asyncio.to_thread(_ytdlp_download, payload.url)
+            except yt_dlp.utils.DownloadError as e:
+                yield event({"step": "error", "message": str(e)})
+                return
+
+            yield event({"step": "saving"})
+            key = _audio_key("audio.mp3")
+            storage.save(audio_bytes, key)
+
+            if compress:
+                yield event({"step": "compressing"})
+                key = await asyncio.to_thread(_compress_audio, storage, key)
+
+            yield event({"step": "transcribing"})
+            sentences = await asyncio.to_thread(asr.transcribe, storage.get_absolute_path(key))
+
+            title = payload.title or extracted_title or urlparse(payload.url).hostname or "imported"
+            audio_file = _persist_audio_file(
+                db, title=title, source_type="url", key=key,
+                sentences=sentences, language=settings.asr.whisperx.language,
+            )
+            result = AudioFileResponse.model_validate(audio_file)
+            yield event({"step": "done", "result": result.model_dump(mode="json")})
+        except Exception as e:
+            yield event({"step": "error", "message": str(e)})
+
+    return StreamingResponse(generate(), media_type="text/event-stream")
 
 
 @router.get("/", response_model=list[AudioFileResponse])

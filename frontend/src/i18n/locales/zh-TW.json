@@ -55,7 +55,11 @@
     "optional": "（選填，YouTube 自動獲取）",
     "audioTitle": "音訊標題",
     "import": "匯入",
-    "failedGeneric": "操作失敗"
+    "failedGeneric": "操作失敗",
+    "stepDownloading": "下載音訊中…",
+    "stepSaving": "處理音訊中…",
+    "stepCompressing": "壓縮音訊中…",
+    "stepTranscribing": "語音轉文字中（較長音訊需要幾分鐘）…"
   },
   "practice": {
     "sentences": "句子",

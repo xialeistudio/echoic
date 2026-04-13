@@ -55,7 +55,11 @@
     "optional": " (optional, auto-detected from YouTube)",
     "audioTitle": "Audio title",
     "import": "Import",
-    "failedGeneric": "Operation failed"
+    "failedGeneric": "Operation failed",
+    "stepDownloading": "Downloading audio…",
+    "stepSaving": "Processing audio…",
+    "stepCompressing": "Compressing audio…",
+    "stepTranscribing": "Transcribing speech… (may take a few minutes for long audio)"
   },
   "practice": {
     "sentences": "Sentences",
