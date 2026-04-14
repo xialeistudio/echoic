@@ -21,6 +21,8 @@ class Sentence(BaseModel):
     words: list[WordTimestamp]
     analysis: str | None = None
     bookmarked: bool = False
+    mastered: bool = False
+    practice_count: int = 0
 
 
 class AudioFileCreate(BaseModel):
