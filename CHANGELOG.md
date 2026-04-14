@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-04-14
+
+### Added
+- **Content Gallery** — browse and import curated VOA Learning English and BBC Learning English episodes directly from the app
+- **Sentence mastered toggle** — mark sentences as mastered to hide them from the list; practice count badge shown per sentence
+- **Sentence search** — filter sentences by text within any audio file
+- **Word error review** — aggregate word accuracy across all practice sessions, sorted worst-first
+- **Playback speed persistence** — selected speed saved to localStorage and restored on next visit
+- **Overview overhaul** — stat cards now show average score alongside practice count; new streak (consecutive days) counter with flame indicator; fixed date locale to respect app language setting
+- **Japanese UI** (`ja`) and **Korean UI** (`ko`) interface language options
+- Demo GIF added to README
+
+### Fixed
+- Pronunciation assessment button in the More dropdown closed the menu without executing — changed `onSelect` to `onClick` (base-ui API)
+- Assessment menu item now keeps the dropdown open during scoring (`closeOnClick={false}`)
+- Date format in Recent Practice list was hardcoded to `zh-CN` regardless of selected language
+
 ## [1.2.0] - 2026-04-13
 
 ### Added

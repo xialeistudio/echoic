@@ -20,7 +20,9 @@
     "practiceCalendar": "Practice Calendar",
     "emptyTitle": "Welcome to Echonic!",
     "emptyDesc": "Add audio to start your speaking practice journey",
-    "emptyAction": "Add Audio"
+    "emptyAction": "Add Audio",
+    "streak": "Day Streak",
+    "streakFire": "On fire!"
   },
   "library": {
     "search": "Search",

@@ -48,6 +48,7 @@ export const collectionApi = {
 }
 
 export const statsApi = {
+  getSummary: () => api.get('/stats/summary'),
   getHeatmap: () => api.get('/stats/heatmap'),
   getRecent: (limit = 20) => api.get(`/stats/recent?limit=${limit}`),
 }
