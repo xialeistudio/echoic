@@ -3,8 +3,10 @@ import { initReactI18next } from 'react-i18next'
 import zhCN from './locales/zh-CN.json'
 import zhTW from './locales/zh-TW.json'
 import en from './locales/en.json'
+import ja from './locales/ja.json'
+import ko from './locales/ko.json'
 
-const SUPPORTED_LANGS = ['zh-CN', 'zh-TW', 'en']
+const SUPPORTED_LANGS = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko']
 
 const saved = (() => {
   try {
@@ -30,6 +32,8 @@ i18n.use(initReactI18next).init({
     'zh-CN': { translation: zhCN },
     'zh-TW': { translation: zhTW },
     en: { translation: en },
+    ja: { translation: ja },
+    ko: { translation: ko },
   },
   lng: saved || detectBrowserLang(),
   fallbackLng: 'en',

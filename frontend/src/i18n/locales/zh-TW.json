@@ -20,7 +20,9 @@
     "practiceCalendar": "練習日曆",
     "emptyTitle": "歡迎使用 Echonic！",
     "emptyDesc": "新增音訊素材，開始口說練習之旅",
-    "emptyAction": "去新增音訊"
+    "emptyAction": "去新增音訊",
+    "streak": "連續打卡",
+    "streakFire": "勢頭正猛！"
   },
   "library": {
     "search": "搜尋",

@@ -1,21 +1,49 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Calendar, TrendingUp, Award } from 'lucide-react'
+import { Calendar, TrendingUp, Award, Flame } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { audioApi, statsApi } from '@/api'
 import Heatmap from '../components/Heatmap'
 
-function StatCard({ icon: Icon, label, value }) {
+function StatCard({ icon: Icon, label, count, avg }) {
+  const { t } = useTranslation()
   return (
     <Card>
       <CardContent className="flex items-center gap-4 p-6">
-        <div className="p-2 rounded-md bg-muted">
+        <div className="p-2 rounded-md bg-muted shrink-0">
           <Icon className="w-5 h-5 text-muted-foreground" />
         </div>
-        <div>
-          <div className="text-2xl font-bold">{value}</div>
+        <div className="min-w-0">
+          <div className="text-2xl font-bold tabular-nums">{count}</div>
           <div className="text-sm text-muted-foreground">{label}</div>
+          {avg != null && (
+            <div className={`text-xs font-medium tabular-nums mt-0.5 ${
+              avg >= 80 ? 'text-green-500' : avg >= 50 ? 'text-yellow-500' : 'text-red-500'
+            }`}>
+              {t('heatmap.avgScore', { score: Math.round(avg) })}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function StreakCard({ streak }) {
+  const { t } = useTranslation()
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className={`p-2 rounded-md shrink-0 ${streak > 0 ? 'bg-orange-100 dark:bg-orange-950' : 'bg-muted'}`}>
+          <Flame className={`w-5 h-5 ${streak > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
+        </div>
+        <div className="min-w-0">
+          <div className="text-2xl font-bold tabular-nums">{streak}</div>
+          <div className="text-sm text-muted-foreground">{t('overview.streak')}</div>
+          {streak >= 7 && (
+            <div className="text-xs font-medium text-orange-500 mt-0.5">{t('overview.streakFire')}</div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -32,7 +60,7 @@ function ScoreTrend({ recent }) {
 
     const scored = recent
       .filter(r => r.accuracy_score != null)
-      .reverse() // oldest first
+      .reverse()
     if (scored.length < 2) return
 
     const dpr = window.devicePixelRatio || 1
@@ -52,7 +80,6 @@ function ScoreTrend({ recent }) {
     const chartW = W - padX - 12
     const chartH = H - padY - padBottom
 
-    // Grid lines
     ctx.strokeStyle = getComputedStyle(canvas).getPropertyValue('--color-border') || 'rgba(128,128,128,0.15)'
     ctx.lineWidth = 0.5
     for (let v = 0; v <= 100; v += 25) {
@@ -61,17 +88,15 @@ function ScoreTrend({ recent }) {
       ctx.moveTo(padX, y)
       ctx.lineTo(padX + chartW, y)
       ctx.stroke()
-
       ctx.fillStyle = getComputedStyle(canvas).getPropertyValue('--color-muted-foreground') || '#888'
       ctx.font = '10px system-ui'
       ctx.textAlign = 'right'
       ctx.fillText(v.toString(), padX - 6, y + 3)
     }
 
-    // Line
     const step = chartW / Math.max(scores.length - 1, 1)
     ctx.beginPath()
-    ctx.strokeStyle = 'oklch(0.65 0.15 160)' // emerald
+    ctx.strokeStyle = 'oklch(0.65 0.15 160)'
     ctx.lineWidth = 2
     ctx.lineJoin = 'round'
     scores.forEach((s, i) => {
@@ -82,7 +107,6 @@ function ScoreTrend({ recent }) {
     })
     ctx.stroke()
 
-    // Dots
     ctx.fillStyle = 'oklch(0.65 0.15 160)'
     scores.forEach((s, i) => {
       const x = padX + i * step
@@ -106,7 +130,7 @@ function ScoreTrend({ recent }) {
 }
 
 function RecentList({ recent }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   if (recent.length === 0) {
     return <p className="text-sm text-muted-foreground">{t('overview.noPractice')}</p>
@@ -135,7 +159,7 @@ function RecentList({ recent }) {
               <span className="text-xs text-muted-foreground">{t('overview.notScored')}</span>
             )}
             <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-              {new Date(r.created_at).toLocaleDateString('zh-CN')}
+              {new Date(r.created_at).toLocaleDateString(i18n.language)}
             </span>
           </div>
         </div>
@@ -162,20 +186,13 @@ export default function Overview() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({ today: 0, week: 0, total: 0 })
+  const [summary, setSummary] = useState(null)
   const [recent, setRecent] = useState([])
   const [isEmpty, setIsEmpty] = useState(false)
 
   useEffect(() => {
     Promise.all([
-      statsApi.getHeatmap().then(r => {
-        const data = r.data
-        const today = new Date().toISOString().slice(0, 10)
-        const todayEntry = data.find(d => d.date === today)
-        const week = data.slice(-7).reduce((s, d) => s + d.count, 0)
-        const total = data.reduce((s, d) => s + d.count, 0)
-        setStats({ today: todayEntry?.count ?? 0, week, total })
-      }),
+      statsApi.getSummary().then(r => setSummary(r.data)),
       statsApi.getRecent(20).then(r => setRecent(r.data)),
       audioApi.list().then(r => r.data.length),
     ]).then(([, , audioCount]) => {
@@ -188,15 +205,13 @@ export default function Overview() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 text-center p-6">
         <div className="text-5xl">🎙️</div>
-        <h2 className="text-xl font-semibold">{t('overview.emptyTitle', { defaultValue: 'Welcome to Echonic!' })}</h2>
-        <p className="text-sm text-muted-foreground max-w-sm">
-          {t('overview.emptyDesc', { defaultValue: '添加音频素材，开始口语练习之旅' })}
-        </p>
+        <h2 className="text-xl font-semibold">{t('overview.emptyTitle')}</h2>
+        <p className="text-sm text-muted-foreground max-w-sm">{t('overview.emptyDesc')}</p>
         <button
           onClick={() => navigate('/speaking')}
           className="mt-2 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
         >
-          {t('overview.emptyAction', { defaultValue: '去添加音频' })}
+          {t('overview.emptyAction')}
         </button>
       </div>
     )
@@ -206,18 +221,20 @@ export default function Overview() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">{t('overview.title')}</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {loading ? (
           <>
+            <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
           </>
         ) : (
           <>
-            <StatCard icon={Calendar} label={t('overview.today')} value={stats.today} />
-            <StatCard icon={TrendingUp} label={t('overview.thisWeek')} value={stats.week} />
-            <StatCard icon={Award} label={t('overview.total')} value={stats.total} />
+            <StatCard icon={Calendar} label={t('overview.today')} count={summary?.today.count ?? 0} avg={summary?.today.avg_score} />
+            <StatCard icon={TrendingUp} label={t('overview.thisWeek')} count={summary?.week.count ?? 0} avg={summary?.week.avg_score} />
+            <StatCard icon={Award} label={t('overview.total')} count={summary?.total.count ?? 0} avg={summary?.total.avg_score} />
+            <StreakCard streak={summary?.streak ?? 0} />
           </>
         )}
       </div>

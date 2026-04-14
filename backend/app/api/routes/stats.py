@@ -21,7 +21,66 @@ class RecentPracticeEntry(BaseModel):
     accuracy_score: float | None
     created_at: datetime
 
+
+class PeriodStats(BaseModel):
+    count: int
+    avg_score: float | None
+
+
+class SummaryStats(BaseModel):
+    today: PeriodStats
+    week: PeriodStats
+    total: PeriodStats
+    streak: int
+
+
 router = APIRouter()
+
+
+def _weighted_avg(db_avg):
+    """Convert raw weighted average expression result to float or None."""
+    return float(db_avg) if db_avg is not None else None
+
+
+def _period_stats(db: Session, start: datetime | None) -> PeriodStats:
+    q = db.query(func.count(PracticeRecord.id), func.avg(
+        PracticeRecord.accuracy_score * settings.scoring.phoneme.accuracy_weight
+        + PracticeRecord.fluency_score * settings.scoring.phoneme.fluency_weight
+        + PracticeRecord.completeness_score * settings.scoring.phoneme.completeness_weight
+    ))
+    if start:
+        q = q.filter(PracticeRecord.created_at >= start)
+    count, avg = q.first()
+    return PeriodStats(count=count or 0, avg_score=_weighted_avg(avg))
+
+
+@router.get("/summary", response_model=SummaryStats)
+async def get_summary(db: Session = Depends(get_db)):
+    today = datetime.utcnow().date()
+    today_start = datetime.combine(today, datetime.min.time())
+    week_start = datetime.combine(today - timedelta(days=6), datetime.min.time())
+
+    today_stats = _period_stats(db, today_start)
+    week_stats = _period_stats(db, week_start)
+    total_stats = _period_stats(db, None)
+
+    # Streak: consecutive days (ending today or yesterday) with at least one practice
+    active_dates = {
+        row[0]
+        for row in db.query(func.date(PracticeRecord.created_at))
+        .group_by(func.date(PracticeRecord.created_at))
+        .all()
+    }
+    streak = 0
+    cursor = today
+    # Allow streak to continue if today has no practice yet (count from yesterday)
+    if cursor not in active_dates:
+        cursor -= timedelta(days=1)
+    while cursor in active_dates:
+        streak += 1
+        cursor -= timedelta(days=1)
+
+    return SummaryStats(today=today_stats, week=week_stats, total=total_stats, streak=streak)
 
 
 @router.get("/heatmap", response_model=list[HeatmapEntry])
