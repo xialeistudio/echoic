@@ -3,6 +3,7 @@
     "overview": "Overview",
     "speaking": "Speaking",
     "settings": "Settings",
+    "gallery": "Gallery",
     "expandSidebar": "Expand sidebar",
     "collapseSidebar": "Collapse sidebar"
   },
@@ -100,7 +101,17 @@
     "micPermissionDenied": "Microphone permission denied — allow it in Settings and retry",
     "micError": "Cannot access microphone",
     "micNotSupported": "Recording not supported (HTTPS or Safari required)",
-    "tapToRetry": "Tap to retry"
+    "tapToRetry": "Tap to retry",
+    "searchSentences": "Search sentences…",
+    "wordSummary": "Word Summary",
+    "hideMastered": "Hide mastered",
+    "onlyBookmarked": "Bookmarked only",
+    "noBookmarked": "No bookmarked sentences",
+    "noSentences": "No sentences",
+    "abCompare": "A/B compare",
+    "abPlayingOrig": "Playing original… (click to cancel)",
+    "abPlayingRec": "Playing your recording…",
+    "more": "More"
   },
   "score": {
     "title": "Score",
@@ -129,14 +140,38 @@
     "appLangDesc": "Display language for the app",
     "nativeLang": "Native Language",
     "nativeLangDesc": "Analysis will reply in this language",
+    "shortcuts": "Keyboard Shortcuts",
+    "shortcut": {
+      "playPause": "Play / pause original audio",
+      "record": "Start / finish recording",
+      "assess": "Submit for assessment",
+      "navigate": "Previous / next sentence",
+      "cancel": "Cancel recording"
+    },
     "about": "About",
-    "version": "Version"
+    "sourceCode": "Source Code",
+    "contentNotice": "Audio content in the Gallery is sourced from public RSS feeds (VOA Learning English, BBC Learning English) and is intended for personal study only."
   },
   "time": {
     "justNow": "Just now",
     "minutesAgo": "{{count}}m ago",
     "hoursAgo": "{{count}}h ago",
     "daysAgo": "{{count}}d ago"
+  },
+  "gallery": {
+    "title": "Content Square",
+    "allSources": "All Sources",
+    "allLevels": "All Levels",
+    "allPrograms": "All Programs",
+    "beginner": "Beginner",
+    "elementary": "Elementary",
+    "intermediate": "Intermediate",
+    "upperIntermediate": "Upper Intermediate",
+    "import": "Import",
+    "importing": "Importing…",
+    "done": "Done",
+    "noEpisodes": "No episodes found",
+    "loadFailed": "Failed to load content"
   },
   "languages": {
     "en-US": "English (en-US)",

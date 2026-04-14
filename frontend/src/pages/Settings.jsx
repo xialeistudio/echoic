@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { Monitor, Moon, Sun, ExternalLink } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
@@ -97,13 +97,46 @@ export default function Settings() {
         </div>
       </section>
 
+      {/* Keyboard Shortcuts */}
+      <section className="mb-8">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t('settings.shortcuts')}</h2>
+        <div className="rounded-lg border border-border/60 px-4 divide-y divide-border/40">
+          {[
+            { keys: ['Space'],         label: t('settings.shortcut.playPause') },
+            { keys: ['R'],             label: t('settings.shortcut.record') },
+            { keys: ['Enter'],         label: t('settings.shortcut.assess') },
+            { keys: ['←', '→'],        label: t('settings.shortcut.navigate') },
+            { keys: ['Esc'],           label: t('settings.shortcut.cancel') },
+          ].map(({ keys, label }) => (
+            <div key={label} className="flex items-center justify-between py-2.5">
+              <span className="text-sm font-medium">{label}</span>
+              <div className="flex items-center gap-1">
+                {keys.map(k => (
+                  <kbd key={k} className="inline-flex items-center justify-center rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground min-w-[1.5rem]">{k}</kbd>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* About */}
       <section>
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t('settings.about')}</h2>
         <div className="rounded-lg border border-border/60 px-4 divide-y divide-border/40">
-          <div className="flex justify-between py-3 text-sm">
-            <span className="text-muted-foreground">{t('settings.version')}</span>
-            <span className="font-mono text-xs">{__APP_VERSION__}</span>
+          <div className="flex justify-between items-center py-3 text-sm">
+            <span className="font-medium">{t('settings.sourceCode')}</span>
+            <a
+              href="https://github.com/xialeistudio/echoic"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+              GitHub <ExternalLink className="size-3" />
+            </a>
+          </div>
+          <div className="py-3 text-xs text-muted-foreground leading-relaxed">
+            {t('settings.contentNotice')}
           </div>
         </div>
       </section>

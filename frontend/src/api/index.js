@@ -23,6 +23,8 @@ export const audioApi = {
     api.post(`/audio/${audioFileId}/sentence/${sentenceIndex}/analyze${lang ? `?lang=${lang}` : ''}`),
   toggleBookmark: (audioFileId, sentenceIndex) =>
     api.post(`/audio/${audioFileId}/sentence/${sentenceIndex}/bookmark`),
+  toggleMastered: (audioFileId, sentenceIndex) =>
+    api.post(`/audio/${audioFileId}/sentence/${sentenceIndex}/master`),
 }
 
 export const practiceApi = {
@@ -48,4 +50,15 @@ export const collectionApi = {
 export const statsApi = {
   getHeatmap: () => api.get('/stats/heatmap'),
   getRecent: (limit = 20) => api.get(`/stats/recent?limit=${limit}`),
+}
+
+export const galleryApi = {
+  list: ({ source, level, program } = {}) => {
+    const params = new URLSearchParams()
+    if (source) params.set('source', source)
+    if (level) params.set('level', level)
+    if (program) params.set('program', program)
+    const qs = params.toString()
+    return api.get(`/gallery${qs ? `?${qs}` : ''}`)
+  },
 }

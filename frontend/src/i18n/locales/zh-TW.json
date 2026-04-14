@@ -3,6 +3,7 @@
     "overview": "概覽",
     "speaking": "口說",
     "settings": "設定",
+    "gallery": "內容廣場",
     "expandSidebar": "展開側邊欄",
     "collapseSidebar": "收起側邊欄"
   },
@@ -100,7 +101,17 @@
     "micPermissionDenied": "麥克風權限被拒絕，請在系統設定中允許後重試",
     "micError": "無法存取麥克風",
     "micNotSupported": "目前環境不支援錄音（需要 HTTPS 或 Safari 瀏覽器）",
-    "tapToRetry": "點擊重試"
+    "tapToRetry": "點擊重試",
+    "searchSentences": "搜尋句子…",
+    "wordSummary": "單詞統計",
+    "hideMastered": "隱藏已掌握",
+    "onlyBookmarked": "僅顯示收藏",
+    "noBookmarked": "暫無收藏句子",
+    "noSentences": "暫無句子",
+    "abCompare": "原聲/錄音對比",
+    "abPlayingOrig": "正在播放原聲…（點擊取消）",
+    "abPlayingRec": "正在播放錄音…",
+    "more": "更多"
   },
   "score": {
     "title": "評分結果",
@@ -129,14 +140,38 @@
     "appLangDesc": "應用介面的顯示語言",
     "nativeLang": "母語",
     "nativeLangDesc": "翻譯和語法分析將使用此語言回覆",
+    "shortcuts": "鍵盤快捷鍵",
+    "shortcut": {
+      "playPause": "播放 / 暫停原聲",
+      "record": "開始 / 完成錄音",
+      "assess": "提交發音評估",
+      "navigate": "上一句 / 下一句",
+      "cancel": "取消錄音"
+    },
     "about": "關於",
-    "version": "版本"
+    "sourceCode": "開源倉庫",
+    "contentNotice": "內容廣場的音訊來自 VOA Learning English、BBC Learning English 的公開 RSS 源，僅供個人學習使用。"
   },
   "time": {
     "justNow": "剛剛",
     "minutesAgo": "{{count}}分鐘前",
     "hoursAgo": "{{count}}小時前",
     "daysAgo": "{{count}}天前"
+  },
+  "gallery": {
+    "title": "內容廣場",
+    "allSources": "全部來源",
+    "allLevels": "全部難度",
+    "allPrograms": "全部節目",
+    "beginner": "入門",
+    "elementary": "初中級",
+    "intermediate": "中級",
+    "upperIntermediate": "中高級",
+    "import": "匯入練習",
+    "importing": "匯入中…",
+    "done": "已匯入",
+    "noEpisodes": "沒有找到內容",
+    "loadFailed": "載入內容失敗"
   },
   "languages": {
     "en-US": "英語 (en-US)",

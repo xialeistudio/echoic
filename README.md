@@ -1,36 +1,49 @@
 # Echoic
 
-**AI-powered English pronunciation practice.** Import any audio, practice sentence by sentence, and get instant phoneme-level scoring.
+**AI-powered speaking practice.** Import any audio, practice sentence by sentence, and get instant phoneme-level pronunciation scoring.
 
 [中文文档](./README_CN.md)
 
 ---
 
+![Echoic demo](./demo.gif)
+
+---
+
 ## Features
 
-- **Audio Import** — Upload files or import from URL
-- **Sentence Practice** — Practice each sentence with playback speed control
-- **Pronunciation Scoring** — Real-time accuracy, fluency, and completeness scores
-- **Phoneme Display** — Word-level IPA transcription for reference
+- **Content Gallery** — Browse and import curated episodes from VOA Learning English and BBC Learning English
+- **Audio Import** — Upload local files or import from any direct audio URL
+- **Collections** — Organise audio into named collections
+- **Sentence Practice** — Practice each sentence with adjustable playback speed (0.5×–2×)
+- **Pronunciation Scoring** — Accuracy, fluency, and completeness scores with word-level breakdown
+- **Phoneme Display** — IPA transcription per word; phonemes colour-coded by score after assessment
+- **Word Error Review** — Aggregate word accuracy across all sessions to identify weak spots
+- **A/B Compare** — Play original then your recording back-to-back in one click
 - **AI Sentence Analysis** — Translation and grammar breakdown via OpenAI or local Ollama (optional)
-- **Practice History** — Track every attempt with scores per sentence
-- **Practice Heatmap** — 365-day visual activity overview
-- **Bookmarks** — Mark sentences for focused review
+- **Practice History** — Every attempt saved with full score details; click to replay any recording
+- **Sentence States** — Bookmark sentences for review; mark sentences as mastered to hide them
+- **Sentence Search** — Filter sentences by text within any audio file
+- **Practice Heatmap** — 365-day activity calendar on the overview page
+- **Keyboard Shortcuts** — Space / R / Enter / ←→ / Esc for hands-free practice flow
+- **Dark Mode** — Light, dark, and system-follow themes
+- **Multilingual UI** — English, Simplified Chinese, Traditional Chinese
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, Vite, Tailwind CSS, shadcn/ui, WaveSurfer.js |
+| Frontend | React 18, Vite, Tailwind CSS v4, shadcn/ui, WaveSurfer.js |
 | Backend | FastAPI, SQLAlchemy, Alembic |
+| Database | PostgreSQL 16 |
 | ASR | WhisperX (faster-whisper + CTranslate2) |
 | Alignment | wav2vec2 |
 | Scoring | wav2vec2 + phonemizer |
-| Database | PostgreSQL 16 |
+| LLM | OpenAI API / Ollama (optional) |
 
 ## Quick Start (Docker)
 
-The easiest way to run Echoic. Only requires [Docker](https://docs.docker.com/get-docker/).
+The easiest way to run Echoic. Requires only [Docker](https://docs.docker.com/get-docker/).
 
 ```bash
 git clone https://github.com/xialeistudio/echoic.git
@@ -38,46 +51,48 @@ cd echoic
 docker compose up
 ```
 
-Open http://localhost:8000 in your browser.
+Open **http://localhost:8000** in your browser.
 
-> **First run note:** The ASR and alignment models (~1 GB) are downloaded automatically on first use and cached in a Docker volume. Subsequent starts are instant.
+> **First run:** The ASR and alignment models (~1 GB) download automatically on first use and are cached in a Docker volume. Subsequent starts are instant.
 
-### Optional: AI Sentence Analysis
+### Enable AI Sentence Analysis (optional)
 
-To enable grammar analysis, create a `.env` file in the project root before running `docker compose up`:
+Create a `.env` file in the project root before running `docker compose up`.
 
-**Using OpenAI:**
+**OpenAI:**
 ```env
 LLM__BACKEND=openai
 LLM__OPENAI__API_KEY=sk-...
 LLM__OPENAI__MODEL=gpt-4o-mini
+# Any OpenAI-compatible endpoint is supported:
+# LLM__OPENAI__BASE_URL=https://api.openai.com/v1
 ```
 
-**Using Ollama (local, no API key):**
+**Ollama (local, no API key):**
 
-First install [Ollama](https://ollama.com) and pull a model:
+Install [Ollama](https://ollama.com) and pull a model first:
 ```bash
-ollama pull qwen3.5:2b
+ollama pull qwen2.5:3b
 ```
 
 Then create `.env`:
 ```env
 LLM__BACKEND=ollama
 LLM__OLLAMA__BASE_URL=http://host.docker.internal:11434
-LLM__OLLAMA__MODEL=qwen3.5:2b
+LLM__OLLAMA__MODEL=qwen2.5:3b
 LLM__OLLAMA__NUM_CTX=512
 ```
 
-> `host.docker.internal` lets the container reach Ollama running on your host machine. On Linux, use your host IP address instead.
+> `host.docker.internal` lets the container reach Ollama on your host machine. On Linux, replace it with your host IP.
 
 ---
 
-## Manual Setup (without Docker)
+## Manual Setup
 
 ### Prerequisites
 
-- Python 3.11+
-- Node.js 20+ and pnpm
+- Python 3.11+, [uv](https://docs.astral.sh/uv/)
+- Node.js 20+, [pnpm](https://pnpm.io)
 - PostgreSQL 16
 - ffmpeg
 - espeak-ng
@@ -94,111 +109,98 @@ sudo apt install ffmpeg espeak-ng postgresql
 
 ### Steps
 
-#### 1. Clone
-
 ```bash
+# 1. Clone
 git clone https://github.com/xialeistudio/echoic.git
 cd echoic
-```
 
-#### 2. Database
+# 2. Start PostgreSQL
+make db                          # starts postgres via Docker on port 5433
 
-```bash
-# Start PostgreSQL via Docker (or use your own instance)
-make db
-```
-
-#### 3. Backend
-
-```bash
+# 3. Backend
 cd backend
-
-# Install dependencies
 uv sync
-
-# Copy and edit environment variables
-cp .env.example .env
-
-# Run database migrations
+cp .env.example .env             # edit as needed
 uv run alembic upgrade head
+cd .. && make run                # serves on http://localhost:8000
 
-# Start the server
-cd .. && make run
+# 4. Frontend (development only — skip for production)
+make dev-frontend                # http://localhost:5173
 ```
 
-#### 4. Frontend (development only)
-
-In a separate terminal:
+For **production**, build the frontend first; it gets bundled into the backend:
 
 ```bash
-make dev-frontend
+make build   # outputs to backend/static/
+make run     # serves API + frontend at http://localhost:8000
 ```
 
-For production, build the frontend first (output goes to `backend/static`):
-
-```bash
-make build
-```
-
-Then `make run` serves both the API and the frontend at `http://localhost:8000`.
+---
 
 ## Environment Variables
 
-Copy `backend/.env.example` to `backend/.env` and adjust as needed.
+Copy `backend/.env.example` to `backend/.env`. All variables are optional except `DATABASE_URL`.
 
 ### Core
 
 | Variable | Default | Description |
 |---|---|---|
-| `DATABASE_URL` | `postgresql://echoic:echoic@localhost:5433/echoic` | PostgreSQL connection string (5433 avoids conflict with a local postgres) |
+| `DATABASE_URL` | `postgresql://echoic:echoic@localhost:5433/echoic` | PostgreSQL connection string |
 | `CORS_ORIGINS` | `["http://localhost:5173"]` | Allowed CORS origins (JSON array) |
 
 ### ASR
 
+> WhisperX uses CTranslate2, which **does not** support MPS (Apple Silicon GPU). Use `cpu` on macOS.
+
 | Variable | Default | Description |
 |---|---|---|
-| `ASR__BACKEND` | `whisperx` | ASR backend |
-| `ASR__WHISPERX__MODEL_SIZE` | `base` | Model size: `tiny` `base` `small` `medium` `large-v2` |
+| `ASR__WHISPERX__MODEL_SIZE` | `base` | `tiny` · `base` · `small` · `medium` · `large-v2` — larger = more accurate, slower |
 | `ASR__WHISPERX__DEVICE` | `cpu` | `cpu` or `cuda` |
-| `ASR__WHISPERX__COMPUTE_TYPE` | `int8` | `int8` `float16` `float32` |
-| `ASR__WHISPERX__LANGUAGE` | `en` | Target language code |
+| `ASR__WHISPERX__COMPUTE_TYPE` | `int8` | `int8` · `float16` · `float32` |
+| `ASR__WHISPERX__LANGUAGE` | `en` | Language code for transcription |
 
 ### Alignment & Scoring
 
+> These use PyTorch — MPS **is** supported on Apple Silicon.
+
 | Variable | Default | Description |
 |---|---|---|
-| `ALIGNMENT__WAV2VEC2__DEVICE` | `cpu` | `cpu` `cuda` `mps` (Apple Silicon) |
-| `SCORING__PHONEME__DEVICE` | `cpu` | `cpu` `cuda` `mps` |
-| `SCORING__PHONEME__ACCURACY_WEIGHT` | `0.5` | Weight for accuracy component |
-| `SCORING__PHONEME__FLUENCY_WEIGHT` | `0.3` | Weight for fluency component |
-| `SCORING__PHONEME__COMPLETENESS_WEIGHT` | `0.2` | Weight for completeness component |
+| `ALIGNMENT__WAV2VEC2__DEVICE` | `cpu` | `cpu` · `cuda` · `mps` |
+| `SCORING__PHONEME__DEVICE` | `cpu` | `cpu` · `cuda` · `mps` |
+| `SCORING__PHONEME__ACCURACY_WEIGHT` | `0.5` | Weight of accuracy in the final score |
+| `SCORING__PHONEME__FLUENCY_WEIGHT` | `0.3` | Weight of fluency |
+| `SCORING__PHONEME__COMPLETENESS_WEIGHT` | `0.2` | Weight of completeness |
 
 ### Storage
 
 | Variable | Default | Description |
 |---|---|---|
 | `STORAGE__BACKEND` | `local` | `local` or `s3` |
-| `STORAGE__LOCAL_DIR` | `storage` | Local storage directory |
-| `STORAGE__S3_BUCKET` | — | S3 bucket name |
+| `STORAGE__LOCAL_DIR` | `storage` | Directory for uploaded audio and recordings |
+| `STORAGE__S3_BUCKET` | — | S3 bucket name (when `STORAGE__BACKEND=s3`) |
 | `STORAGE__S3_PREFIX` | `echoic/` | S3 key prefix |
 
-### LLM (Optional)
+### LLM (optional)
+
+Required only for the "Translation & Analysis" feature.
 
 | Variable | Default | Description |
 |---|---|---|
-| `LLM__BACKEND` | — | `openai` or `ollama` |
+| `LLM__BACKEND` | — | `openai` or `ollama` — leave unset to disable |
 | `LLM__OPENAI__API_KEY` | — | OpenAI API key |
-| `LLM__OPENAI__MODEL` | `gpt-4o-mini` | OpenAI model |
-| `LLM__OPENAI__BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible endpoint |
+| `LLM__OPENAI__MODEL` | `gpt-4o-mini` | Model name |
+| `LLM__OPENAI__BASE_URL` | `https://api.openai.com/v1` | Any OpenAI-compatible endpoint |
 | `LLM__OLLAMA__BASE_URL` | `http://localhost:11434` | Ollama server URL |
 | `LLM__OLLAMA__MODEL` | `llama3` | Ollama model name |
-| `LLM__OLLAMA__NUM_CTX` | `512` | Context window (512 is enough for sentence analysis) |
-| `LLM__OLLAMA__THINK` | `false` | Enable thinking mode for supported models (e.g. qwen3.5) |
+| `LLM__OLLAMA__NUM_CTX` | `512` | Context size (512 is enough for sentence analysis) |
+| `LLM__OLLAMA__THINK` | `false` | Enable thinking mode (e.g. for qwen3) |
+
+---
 
 ## Development
 
 ```bash
-# Terminal 1 — database (exposed on localhost:5433, won't conflict with a local postgres)
+# Terminal 1 — database (port 5433, avoids conflict with a local postgres)
 docker compose up db
 
 # Terminal 2 — backend with hot reload
@@ -208,22 +210,25 @@ make dev-backend
 make dev-frontend
 ```
 
-Open http://localhost:5173. The frontend dev server proxies `/api` to the backend.
+Open **http://localhost:5173**. The dev server proxies `/api` to the backend at port 8000.
 
-Create `docker-compose.override.yml` to expose the database port (not committed to git):
+The `docker-compose.override.yml` exposes the database on `localhost:5433` and is already in `.gitignore` — you can add your own local overrides there.
 
-```yaml
-services:
-  db:
-    ports:
-      - "5433:5432"
-```
+---
 
-Then set `DATABASE_URL` in `backend/.env`:
+## Keyboard Shortcuts
 
-```env
-DATABASE_URL=postgresql://echoic:echoic@localhost:5433/echoic
-```
+Available on the Practice page:
+
+| Key | Action |
+|---|---|
+| `Space` | Play / pause original audio |
+| `R` | Start / finish recording |
+| `Enter` | Submit recording for assessment |
+| `← →` | Previous / next sentence |
+| `Esc` | Cancel recording |
+
+---
 
 ## License
 

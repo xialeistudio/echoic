@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.api.routes import audio, practice, stats, collections
+from app.api.routes import audio, practice, stats, collections, gallery
 from app.config import settings
 
 app = FastAPI(title="Echoic API")
@@ -24,6 +24,7 @@ app.include_router(audio.router, prefix="/api/audio", tags=["audio"])
 app.include_router(practice.router, prefix="/api/practice", tags=["practice"])
 app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
 app.include_router(collections.router, prefix="/api/collections", tags=["collections"])
+app.include_router(gallery.router, prefix="/api/gallery", tags=["gallery"])
 
 
 @app.get("/api/version")

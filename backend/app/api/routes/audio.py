@@ -41,18 +41,17 @@ def _audio_key(filename: str, *, compressed: bool = False) -> str:
 def _compress_audio(storage: "StorageService", key: str) -> str:
     """Re-encode stored file as 64 kbps mono MP3. Returns new key."""
     src = storage.get_absolute_path(key)
-    new_key = Path(key).with_suffix(".mp3").as_posix()
+    new_key = _audio_key("compressed.mp3", compressed=True)
     dst = storage.get_absolute_path(new_key)
     subprocess.run(
         ["ffmpeg", "-y", "-i", str(src), "-ac", "1", "-ab", "64k", str(dst)],
         check=True,
         capture_output=True,
     )
-    if new_key != key:
-        try:
-            storage.delete(key)
-        except Exception:
-            pass
+    try:
+        storage.delete(key)
+    except Exception:
+        pass
     return new_key
 
 
@@ -177,10 +176,22 @@ async def list_audio_files(db: Session = Depends(get_db)):
 
 @router.get("/{audio_file_id}", response_model=AudioFileResponse)
 async def get_audio_file(audio_file_id: int, db: Session = Depends(get_db)):
+    from sqlalchemy import func as sa_func
     audio_file = db.get(AudioFile, audio_file_id)
     if audio_file is None:
         raise HTTPException(status_code=404, detail="audio file not found")
-    return audio_file
+    count_rows = (
+        db.query(PracticeRecord.sentence_index, sa_func.count(PracticeRecord.id))
+        .filter(PracticeRecord.audio_file_id == audio_file_id)
+        .group_by(PracticeRecord.sentence_index)
+        .all()
+    )
+    count_map = {idx: cnt for idx, cnt in count_rows}
+    response = AudioFileResponse.model_validate(audio_file)
+    if response.sentences:
+        for s in response.sentences:
+            s.practice_count = count_map.get(s.index, 0)
+    return response
 
 
 def _get_sentence_dict(audio_file: AudioFile, sentence_index: int) -> dict:
@@ -195,6 +206,21 @@ def _update_sentence_field(db: Session, audio_file: AudioFile, sentence_index: i
     sentences[sentence_index].update(fields)
     audio_file.sentences = sentences
     db.commit()
+
+
+@router.post("/{audio_file_id}/sentence/{sentence_index}/master")
+async def toggle_master(
+    audio_file_id: int,
+    sentence_index: int,
+    db: Session = Depends(get_db),
+):
+    audio_file = db.get(AudioFile, audio_file_id)
+    if audio_file is None:
+        raise HTTPException(status_code=404, detail="audio file not found")
+    sentence = _get_sentence_dict(audio_file, sentence_index)
+    new_val = not sentence.get("mastered", False)
+    _update_sentence_field(db, audio_file, sentence_index, mastered=new_val)
+    return {"mastered": new_val}
 
 
 @router.post("/{audio_file_id}/sentence/{sentence_index}/bookmark")

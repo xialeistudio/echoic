@@ -3,6 +3,7 @@
     "overview": "概览",
     "speaking": "口语",
     "settings": "设置",
+    "gallery": "内容广场",
     "expandSidebar": "展开侧边栏",
     "collapseSidebar": "收起侧边栏"
   },
@@ -100,7 +101,17 @@
     "micPermissionDenied": "麦克风权限被拒绝，请在系统设置中允许后重试",
     "micError": "无法访问麦克风",
     "micNotSupported": "当前环境不支持录音（需要 HTTPS 或 Safari 浏览器）",
-    "tapToRetry": "点击重试"
+    "tapToRetry": "点击重试",
+    "searchSentences": "搜索句子…",
+    "wordSummary": "单词统计",
+    "hideMastered": "隐藏已掌握",
+    "onlyBookmarked": "仅显示收藏",
+    "noBookmarked": "暂无收藏句子",
+    "noSentences": "暂无句子",
+    "abCompare": "原声/录音对比",
+    "abPlayingOrig": "正在播放原声…（点击取消）",
+    "abPlayingRec": "正在播放录音…",
+    "more": "更多"
   },
   "score": {
     "title": "评分结果",
@@ -129,14 +140,38 @@
     "appLangDesc": "应用界面的显示语言",
     "nativeLang": "母语",
     "nativeLangDesc": "翻译和语法分析将使用此语言回复",
+    "shortcuts": "键盘快捷键",
+    "shortcut": {
+      "playPause": "播放 / 暂停原声",
+      "record": "开始 / 完成录音",
+      "assess": "提交发音评估",
+      "navigate": "上一句 / 下一句",
+      "cancel": "取消录音"
+    },
     "about": "关于",
-    "version": "版本"
+    "sourceCode": "开源仓库",
+    "contentNotice": "内容广场的音频来自 VOA Learning English、BBC Learning English 的公开 RSS 源，仅供个人学习使用。"
   },
   "time": {
     "justNow": "刚刚",
     "minutesAgo": "{{count}}分钟前",
     "hoursAgo": "{{count}}小时前",
     "daysAgo": "{{count}}天前"
+  },
+  "gallery": {
+    "title": "内容广场",
+    "allSources": "全部来源",
+    "allLevels": "全部难度",
+    "allPrograms": "全部节目",
+    "beginner": "入门",
+    "elementary": "初中级",
+    "intermediate": "中级",
+    "upperIntermediate": "中高级",
+    "import": "导入练习",
+    "importing": "导入中…",
+    "done": "已导入",
+    "noEpisodes": "没有找到内容",
+    "loadFailed": "加载内容失败"
   },
   "languages": {
     "en-US": "英语 (en-US)",
