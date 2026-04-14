@@ -40,7 +40,18 @@ class OpenAILLMService(LLMService):
 
     def analyze(self, text: str, reply_lang: str = "zh-CN") -> str:
         lang = LANG_NAMES.get(reply_lang, reply_lang)
+        system = (
+            f"You are an English teacher. Analyze the English sentence the user provides. "
+            f"Reply in {lang}. "
+            f"Output ONLY the following three markdown sections, no extra text before or after:\n\n"
+            f"## Structure\n"
+            f"One or two sentences describing the sentence type and grammatical structure.\n\n"
+            f"## Grammar\n"
+            f"Key grammar points (tense, voice, clause type, etc.).\n\n"
+            f"## Vocabulary\n"
+            f"Important or difficult words with their meaning in context."
+        )
         return self._chat([
-            {"role": "system", "content": f"You are an English teacher. Analyze the following English sentence. Cover: sentence structure, grammar points, and any difficult vocabulary. Be concise. Reply in {lang}. Do NOT add any trailing offers to help further or follow-up suggestions."},
+            {"role": "system", "content": system},
             {"role": "user", "content": text},
         ])
