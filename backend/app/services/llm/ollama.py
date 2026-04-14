@@ -1,5 +1,3 @@
-import json
-
 import httpx
 
 from app.config import OllamaConfig
@@ -35,14 +33,9 @@ class OllamaLLMService(LLMService):
         lang = LANG_NAMES.get(reply_lang, reply_lang)
         system = (
             f"You are an English teacher. Analyze the English sentence the user provides. "
-            f"Reply in {lang}. "
-            f"Output ONLY the following three markdown sections, no extra text before or after:\n\n"
-            f"## Structure\n"
-            f"One or two sentences describing the sentence type and grammatical structure.\n\n"
-            f"## Grammar\n"
-            f"Key grammar points (tense, voice, clause type, etc.).\n\n"
-            f"## Vocabulary\n"
-            f"Important or difficult words with their meaning in context."
+            f"Reply entirely in {lang}, including the section headings. "
+            f"Output ONLY three markdown sections (## heading), covering: sentence structure, grammar points, key vocabulary. "
+            f"No text outside the three sections."
         )
         return self._chat([
             {"role": "system", "content": system},
