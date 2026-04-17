@@ -2,7 +2,7 @@
 
 **AI-powered speaking practice.** Import any audio, practice sentence by sentence, and get instant phoneme-level pronunciation scoring.
 
-[中文文档](./README_CN.md)
+[English](./README.md) · [简体中文](./README_CN.md) · [繁體中文](./README_TW.md) · [日本語](./README_JA.md) · [한국어](./README_KO.md) · [Français](./README_FR.md) · [Deutsch](./README_DE.md)
 
 ---
 
@@ -27,7 +27,26 @@
 - **Practice Heatmap** — 365-day activity calendar on the overview page
 - **Keyboard Shortcuts** — Space / R / Enter / ←→ / Esc for hands-free practice flow
 - **Dark Mode** — Light, dark, and system-follow themes
-- **Multilingual UI** — English, Simplified Chinese, Traditional Chinese
+- **Multi-language Learning** — Practice English, French, and German; phoneme scoring adapts per language
+- **Multilingual UI** — English, Simplified Chinese, Traditional Chinese, Japanese, Korean, French, German
+
+## Supported Learning Languages
+
+| Language | `ASR__WHISPERX__LANGUAGE` | `ALIGNMENT__WAV2VEC2__LANGUAGE` | `SCORING__PHONEME__LANGUAGE` |
+|---|---|---|---|
+| English | `en` | `en` | `en-us` |
+| French | `fr` | `fr` | `fr-fr` |
+| German | `de` | `de` | `de` |
+
+> Phoneme scoring uses [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft) for all languages. Alignment models are downloaded automatically by whisperx on first use.
+
+To switch learning language, set three variables in `.env`:
+
+```env
+ASR__WHISPERX__LANGUAGE=fr
+ALIGNMENT__WAV2VEC2__LANGUAGE=fr
+SCORING__PHONEME__LANGUAGE=fr-fr
+```
 
 ## Tech Stack
 
@@ -166,7 +185,9 @@ Copy `backend/.env.example` to `backend/.env`. All variables are optional except
 | Variable | Default | Description |
 |---|---|---|
 | `ALIGNMENT__WAV2VEC2__DEVICE` | `cpu` | `cpu` · `cuda` · `mps` |
+| `ALIGNMENT__WAV2VEC2__LANGUAGE` | `en` | Language code — must match `ASR__WHISPERX__LANGUAGE` |
 | `SCORING__PHONEME__DEVICE` | `cpu` | `cpu` · `cuda` · `mps` |
+| `SCORING__PHONEME__LANGUAGE` | `en-us` | espeak language code (`en-us` · `fr-fr` · `de` · `ja` …) |
 | `SCORING__PHONEME__ACCURACY_WEIGHT` | `0.5` | Weight of accuracy in the final score |
 | `SCORING__PHONEME__FLUENCY_WEIGHT` | `0.3` | Weight of fluency |
 | `SCORING__PHONEME__COMPLETENESS_WEIGHT` | `0.2` | Weight of completeness |
@@ -227,6 +248,17 @@ Available on the Practice page:
 | `Enter` | Submit recording for assessment |
 | `← →` | Previous / next sentence |
 | `Esc` | Cancel recording |
+
+---
+
+## Data Backup
+
+All persistent data lives in two places:
+
+- **Database**: Docker volume `postgres_data` — practice records, scores, sentence states
+- **Audio files**: Docker volume `storage` — uploaded audio and recordings
+
+Copy both volumes when migrating or backing up.
 
 ---
 

@@ -2,7 +2,7 @@
 
 **AI 驱动的口语练习工具。** 导入任意音频，逐句跟读，即时获得音素级发音评分。
 
-[English](./README.md)
+[English](./README.md) · [简体中文](./README_CN.md) · [繁體中文](./README_TW.md) · [日本語](./README_JA.md) · [한국어](./README_KO.md) · [Français](./README_FR.md) · [Deutsch](./README_DE.md)
 
 ---
 
@@ -27,7 +27,26 @@
 - **练习热力图** — 365 天练习活跃度日历
 - **键盘快捷键** — 空格 / R / 回车 / ←→ / Esc 全程键盘操作
 - **深色模式** — 浅色、深色、跟随系统三选一
-- **多语言界面** — 简体中文、繁体中文、英文
+- **多语种练习** — 支持英语、法语、德语学习；发音评分按语言自动适配
+- **多语言界面** — 简体中文、繁体中文、英文、日语、韩语、法语、德语
+
+## 支持的练习语言
+
+| 语言 | `ASR__WHISPERX__LANGUAGE` | `ALIGNMENT__WAV2VEC2__LANGUAGE` | `SCORING__PHONEME__LANGUAGE` |
+|---|---|---|---|
+| 英语 | `en` | `en` | `en-us` |
+| 法语 | `fr` | `fr` | `fr-fr` |
+| 德语 | `de` | `de` | `de` |
+
+> 音素评分模型所有语言共用 [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft)。对齐模型由 whisperx 在首次使用时自动下载。
+
+切换练习语言只需在 `.env` 中设置三个变量：
+
+```env
+ASR__WHISPERX__LANGUAGE=fr
+ALIGNMENT__WAV2VEC2__LANGUAGE=fr
+SCORING__PHONEME__LANGUAGE=fr-fr
+```
 
 ## 技术栈
 
@@ -166,7 +185,9 @@ make run     # API + 前端统一由 http://localhost:8000 提供服务
 | 变量 | 默认值 | 说明 |
 |---|---|---|
 | `ALIGNMENT__WAV2VEC2__DEVICE` | `cpu` | `cpu` · `cuda` · `mps` |
+| `ALIGNMENT__WAV2VEC2__LANGUAGE` | `en` | 语言代码，须与 `ASR__WHISPERX__LANGUAGE` 保持一致 |
 | `SCORING__PHONEME__DEVICE` | `cpu` | `cpu` · `cuda` · `mps` |
+| `SCORING__PHONEME__LANGUAGE` | `en-us` | espeak 语言代码（`en-us` · `fr-fr` · `de` · `ja` …） |
 | `SCORING__PHONEME__ACCURACY_WEIGHT` | `0.5` | 准确度在综合评分中的权重 |
 | `SCORING__PHONEME__FLUENCY_WEIGHT` | `0.3` | 流利度权重 |
 | `SCORING__PHONEME__COMPLETENESS_WEIGHT` | `0.2` | 完整度权重 |
@@ -225,6 +246,17 @@ make dev-frontend
 | `Enter` | 提交发音评估 |
 | `← →` | 上一句 / 下一句 |
 | `Esc` | 取消录音 |
+
+---
+
+## 数据备份
+
+所有数据存储在两个地方：
+
+- **数据库**：Docker Volume `postgres_data`（练习记录、评分、句子状态）
+- **音频文件**：Docker Volume `storage`（上传的音频和录音）
+
+迁移或备份时复制这两个 Volume 即可。
 
 ---
 
