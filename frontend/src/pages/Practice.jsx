@@ -33,6 +33,7 @@ export default function Practice() {
   const [sentences, setSentences] = useState([])
   const [selectedSentence, setSelectedSentence] = useState(null)
   const [phonemes, setPhonemes] = useState([])
+  const [phonemesLoading, setPhonemesLoading] = useState(false)
   const [analysis, setAnalysis] = useState(null)
   const [analyzing, setAnalyzing] = useState(false)
 
@@ -162,6 +163,17 @@ export default function Practice() {
     resetForSentence()
     audioApi.getPhonemes(audioFileId, sentence.index).then(r => setPhonemes(r.data)).catch(() => {})
     practiceApi.getHistory(audioFileId, sentence.index).then(r => setHistory(r.data)).catch(() => {})
+  }
+
+  async function handleRefreshPhonemes() {
+    if (!selectedSentence || phonemesLoading) return
+    setPhonemesLoading(true)
+    try {
+      const { data } = await audioApi.getPhonemes(audioFileId, selectedSentence.index, { refresh: true })
+      setPhonemes(data)
+    } finally {
+      setPhonemesLoading(false)
+    }
   }
 
   async function handleAnalyze() {
@@ -393,6 +405,8 @@ export default function Practice() {
                   analysis={analysis}
                   analyzing={analyzing}
                   onAnalyze={handleAnalyze}
+                  phonemesLoading={phonemesLoading}
+                  onRefreshPhonemes={handleRefreshPhonemes}
                 />
               </TabsContent>
               <TabsContent value="practice" className="mt-0 flex-1 flex flex-col min-h-0 data-[state=inactive]:hidden">

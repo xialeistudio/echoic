@@ -7,11 +7,10 @@ import tempfile
 import soundfile as sf
 import torch
 import torchaudio
-from Levenshtein import distance as levenshtein_distance
-
 from app.config import PhonemeScoringConfig
 from app.schemas.audio import WordTimestamp
 from app.schemas.practice import WordScore
+from app.services.scoring.backends import get_backend
 from app.services.scoring.base import ScoringResult, ScoringService
 
 
@@ -21,7 +20,7 @@ class PhonemeScoringService(ScoringService):
         self._processor = None
         self._model = None
         self._model_device = "cpu"
-        self._phonemizer_available = None
+        self._backend = get_backend(config.language)
 
     @staticmethod
     def _display_word(word: str) -> str:
@@ -116,82 +115,8 @@ class PhonemeScoringService(ScoringService):
             self._model = self._model.to(device)
             self._model_device = device
 
-    @staticmethod
-    def _to_hiragana(words: list[str]) -> list[str]:
-        """Convert Japanese words to hiragana with compound-word awareness.
-
-        Joins all words before conversion so pykakasi can recognize compounds
-        (e.g. 今+日 separately → いま+にち wrong; 今日 together → きょう correct).
-        The compound reading is assigned to the first character of the compound;
-        subsequent characters receive an empty string so they produce no phoneme
-        rather than a wrong one.
-        """
-        import pykakasi
-        kks = pykakasi.kakasi()
-
-        full = "".join(words)
-        items = kks.convert(full)
-
-        # Build per-character hiragana list: first char of each compound gets the
-        # full reading, remaining chars get "".
-        per_char: list[str] = []
-        for item in items:
-            per_char.append(item["hira"])
-            per_char.extend("" for _ in range(len(item["orig"]) - 1))
-
-        result = []
-        pos = 0
-        for word in words:
-            hira = "".join(per_char[pos:pos + len(word)])
-            result.append(hira)
-            pos += len(word)
-        return result
-
     def _phonemize_words(self, words: list[str]) -> list[str]:
-        if not words:
-            return []
-
-        if self._phonemizer_available is False:
-            return [self._normalize_text(word) for word in words]
-
-        try:
-            from phonemizer import phonemize
-
-            if self.config.language == "ja":
-                # Convert kanji to hiragana using full-context compound detection.
-                # Chars that are the tail of a compound (e.g. 日 in 今日) get "".
-                hiragana = self._to_hiragana(words)
-                # Only phonemize non-empty entries; map "" → "" directly.
-                indices = [i for i, h in enumerate(hiragana) if h]
-                ph_result = [""] * len(words)
-                if indices:
-                    batch = [hiragana[i] for i in indices]
-                    batch_phonemes = phonemize(
-                        batch,
-                        language=self.config.language,
-                        backend="espeak",
-                        strip=True,
-                        preserve_punctuation=False,
-                        with_stress=True,
-                    )
-                    for i, ph in zip(indices, batch_phonemes):
-                        ph_result[i] = str(ph)
-                self._phonemizer_available = True
-                return ph_result
-
-            phonemes = phonemize(
-                words,
-                language=self.config.language,
-                backend="espeak",
-                strip=True,
-                preserve_punctuation=False,
-                with_stress=True,
-            )
-            self._phonemizer_available = True
-            return [str(phoneme) for phoneme in phonemes]
-        except RuntimeError:
-            self._phonemizer_available = False
-            return [self._normalize_text(word) for word in words]
+        return self._backend.phonemize(words)
 
     @staticmethod
     def _load_waveform(recording_path: str) -> tuple[torch.Tensor, int]:
@@ -309,7 +234,8 @@ class PhonemeScoringService(ScoringService):
         return word_acc, per_word_ph
 
     def phonemize_words(self, words: list[str]) -> list[str]:
-        return self._phonemize_words(words)
+        """Return display phonemes (romaji for Japanese, IPA for others)."""
+        return self._backend.display(words)
 
     def score(
         self,
@@ -318,7 +244,9 @@ class PhonemeScoringService(ScoringService):
         aligned_words: list[WordTimestamp],
     ) -> ScoringResult:
         reference_words = self._reference_words(reference_text)
-        expected_phonemes = self._phonemize_words(reference_words)
+        # IPA for CTC alignment scoring; display format (romaji/IPA) for the UI
+        ipa_phonemes = self._phonemize_words(reference_words)
+        display_phonemes = self._backend.display(reference_words)
         matched_words = self._match_reference_to_aligned(reference_words, aligned_words)
 
         waveform, sample_rate = self._load_waveform(recording_path)
@@ -330,7 +258,7 @@ class PhonemeScoringService(ScoringService):
 
         if self._load_model() and matched_words:
             present_indices = [i for i, m in enumerate(matched_words) if m is not None]
-            present_phonemes = [expected_phonemes[i] for i in present_indices]
+            present_phonemes = [ipa_phonemes[i] for i in present_indices]
             if present_phonemes:
                 try:
                     present_acc, present_ph = self._forced_align_scores(
@@ -346,12 +274,12 @@ class PhonemeScoringService(ScoringService):
             WordScore(
                 word=ref_word,
                 accuracy_score=acc,
-                expected_phonemes=exp_ph,
+                expected_phonemes=disp_ph,
                 actual_phonemes="",
                 phoneme_scores=ph,
             )
-            for ref_word, exp_ph, acc, ph in zip(
-                reference_words, expected_phonemes, all_word_acc, all_ph_scores
+            for ref_word, disp_ph, acc, ph in zip(
+                reference_words, display_phonemes, all_word_acc, all_ph_scores
             )
         ]
 

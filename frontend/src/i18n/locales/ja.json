@@ -77,6 +77,7 @@
     "myPractice": "練習記録",
     "selectSentence": "センテンスを選択して練習を開始",
     "analyzeSentence": "分析する",
+    "refreshPhonemes": "音標を再生成",
     "noPractice": "練習記録がありません",
     "selectToView": "センテンスを選択して確認",
     "accuracy": "正確さ",

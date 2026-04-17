@@ -242,6 +242,7 @@ async def toggle_bookmark(
 async def get_sentence_phonemes(
     audio_file_id: int,
     sentence_index: int,
+    refresh: bool = Query(False),
     db: Session = Depends(get_db),
     scoring: ScoringService = Depends(get_scoring_service),
 ):
@@ -249,7 +250,7 @@ async def get_sentence_phonemes(
     if audio_file is None:
         raise HTTPException(status_code=404, detail="audio file not found")
     sentence = _get_sentence_dict(audio_file, sentence_index)
-    if cached := sentence.get("word_phonemes"):
+    if not refresh and (cached := sentence.get("word_phonemes")):
         return [WordPhoneme(**p) for p in cached]
     words = [w["word"] for w in (sentence.get("words") or []) if w.get("word")]
     if not words:

@@ -17,8 +17,8 @@ export const audioApi = {
   rename: (audioFileId, title, language) => api.patch(`/audio/${audioFileId}`, { title, language }),
   delete: (audioFileId) => api.delete(`/audio/${audioFileId}`),
   streamUrl: (audioFileId) => `/api/audio/${audioFileId}/stream`,
-  getPhonemes: (audioFileId, sentenceIndex) =>
-    api.get(`/audio/${audioFileId}/sentence/${sentenceIndex}/phonemes`),
+  getPhonemes: (audioFileId, sentenceIndex, { refresh = false } = {}) =>
+    api.get(`/audio/${audioFileId}/sentence/${sentenceIndex}/phonemes${refresh ? '?refresh=true' : ''}`),
   analyze: (audioFileId, sentenceIndex, { lang } = {}) =>
     api.post(`/audio/${audioFileId}/sentence/${sentenceIndex}/analyze${lang ? `?lang=${lang}` : ''}`),
   toggleBookmark: (audioFileId, sentenceIndex) =>

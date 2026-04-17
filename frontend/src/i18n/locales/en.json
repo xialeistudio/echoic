@@ -77,6 +77,7 @@
     "myPractice": "My Practice",
     "selectSentence": "Select a sentence to start",
     "analyzeSentence": "Analyze",
+    "refreshPhonemes": "Regenerate Phonemes",
     "noPractice": "No practice records",
     "selectToView": "Select a sentence to view",
     "accuracy": "Accuracy",

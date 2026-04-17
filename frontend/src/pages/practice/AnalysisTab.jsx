@@ -1,16 +1,28 @@
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
+import { Loader2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Markdown from 'react-markdown'
 import WordIpaRow from './WordIpaRow'
 
-export default function AnalysisTab({ selectedSentence, words, activeWordIndex, analysis, analyzing, onAnalyze }) {
+export default function AnalysisTab({ selectedSentence, words, activeWordIndex, analysis, analyzing, onAnalyze, phonemesLoading, onRefreshPhonemes }) {
   const { t } = useTranslation()
   return (
     <>
       <div className="mb-4">
         {selectedSentence ? (
-          <WordIpaRow words={words} activeIndex={activeWordIndex} />
+          <div className="group relative">
+            <WordIpaRow words={words} activeIndex={activeWordIndex} />
+            <button
+              onClick={onRefreshPhonemes}
+              disabled={phonemesLoading}
+              title={t('practice.refreshPhonemes')}
+              className="absolute -top-1 -right-1 hidden group-hover:flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+            >
+              {phonemesLoading
+                ? <Loader2 className="size-3 animate-spin" />
+                : <RefreshCw className="size-3" />}
+            </button>
+          </div>
         ) : (
           <p className="text-sm text-muted-foreground/50">{t('practice.selectSentence')}</p>
         )}
