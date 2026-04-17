@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-04-17
+
+### Added
+- **French and German learning support** — full pipeline (ASR → alignment → phoneme scoring) now works for French (`fr`) and German (`de`); configure via `ASR__WHISPERX__LANGUAGE`, `ALIGNMENT__WAV2VEC2__LANGUAGE`, and `SCORING__PHONEME__LANGUAGE`
+- **Language badge** — audio language shown as a pill badge in the library list and practice page breadcrumb
+- **Language filter** — select dropdown in the audio library to filter by language (shown only when multiple languages are present)
+- **French UI** (`fr`) and **German UI** (`de`) interface language options
+- **Multilingual README** — separate README files for 7 languages (EN / 简体中文 / 繁體中文 / 日本語 / 한국어 / Français / Deutsch)
+
+### Fixed
+- Wav2vec2 alignment text cleaning now uses Unicode-aware regex (`\w`) to handle accented characters in French and German
+- French espeak language code is `fr-fr` (not `fr`) — `fr` causes a `RuntimeError` in phonemizer
+
 ## [1.3.0] - 2026-04-14
 
 ### Added
