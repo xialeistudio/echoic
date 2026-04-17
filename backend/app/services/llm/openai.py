@@ -1,14 +1,23 @@
-import json
-
 import httpx
 
 from app.config import OpenAIConfig
 from app.services.llm.base import LLMService
 
-LANG_NAMES = {
+REPLY_LANG_NAMES = {
     "zh-CN": "Simplified Chinese",
     "zh-TW": "Traditional Chinese",
     "en": "English",
+    "ja": "Japanese",
+    "ko": "Korean",
+    "fr": "French",
+    "de": "German",
+}
+
+SOURCE_LANG_NAMES = {
+    "en": "English",
+    "fr": "French",
+    "de": "German",
+    "ja": "Japanese",
 }
 
 
@@ -17,32 +26,22 @@ class OpenAILLMService(LLMService):
         self.config = config
 
     def _chat(self, messages: list[dict]) -> str:
-        parts = []
-        with httpx.stream(
-            "POST",
+        resp = httpx.post(
             f"{self.config.base_url}/chat/completions",
             headers={"Authorization": f"Bearer {self.config.api_key}"},
-            json={"model": self.config.model, "messages": messages, "stream": True},
+            json={"model": self.config.model, "messages": messages},
             timeout=60.0,
-        ) as resp:
-            resp.raise_for_status()
-            for line in resp.iter_lines():
-                if not line.startswith("data:"):
-                    continue
-                payload = line[5:].strip()
-                if payload == "[DONE]":
-                    break
-                chunk = json.loads(payload)
-                delta = chunk["choices"][0]["delta"]
-                if text := delta.get("content"):
-                    parts.append(text)
-        return "".join(parts).strip()
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"].strip()
 
-    def analyze(self, text: str, reply_lang: str = "zh-CN") -> str:
-        lang = LANG_NAMES.get(reply_lang, reply_lang)
+    def analyze(self, text: str, reply_lang: str = "zh-CN", source_lang: str = "en") -> str:
+        reply = REPLY_LANG_NAMES.get(reply_lang, reply_lang)
+        source = SOURCE_LANG_NAMES.get(source_lang, source_lang)
         system = (
-            f"You are an English teacher. Analyze the English sentence the user provides. "
-            f"Reply entirely in {lang}, including the section headings. "
+            f"You are a language teacher specializing in {source}. "
+            f"Analyze the {source} sentence the user provides. "
+            f"Reply entirely in {reply}, including the section headings. "
             f"Output ONLY three markdown sections (## heading), covering: sentence structure, grammar points, key vocabulary. "
             f"No text outside the three sections."
         )

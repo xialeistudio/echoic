@@ -116,6 +116,37 @@ class PhonemeScoringService(ScoringService):
             self._model = self._model.to(device)
             self._model_device = device
 
+    @staticmethod
+    def _to_hiragana(words: list[str]) -> list[str]:
+        """Convert Japanese words to hiragana with compound-word awareness.
+
+        Joins all words before conversion so pykakasi can recognize compounds
+        (e.g. 今+日 separately → いま+にち wrong; 今日 together → きょう correct).
+        The compound reading is assigned to the first character of the compound;
+        subsequent characters receive an empty string so they produce no phoneme
+        rather than a wrong one.
+        """
+        import pykakasi
+        kks = pykakasi.kakasi()
+
+        full = "".join(words)
+        items = kks.convert(full)
+
+        # Build per-character hiragana list: first char of each compound gets the
+        # full reading, remaining chars get "".
+        per_char: list[str] = []
+        for item in items:
+            per_char.append(item["hira"])
+            per_char.extend("" for _ in range(len(item["orig"]) - 1))
+
+        result = []
+        pos = 0
+        for word in words:
+            hira = "".join(per_char[pos:pos + len(word)])
+            result.append(hira)
+            pos += len(word)
+        return result
+
     def _phonemize_words(self, words: list[str]) -> list[str]:
         if not words:
             return []
@@ -125,6 +156,28 @@ class PhonemeScoringService(ScoringService):
 
         try:
             from phonemizer import phonemize
+
+            if self.config.language == "ja":
+                # Convert kanji to hiragana using full-context compound detection.
+                # Chars that are the tail of a compound (e.g. 日 in 今日) get "".
+                hiragana = self._to_hiragana(words)
+                # Only phonemize non-empty entries; map "" → "" directly.
+                indices = [i for i, h in enumerate(hiragana) if h]
+                ph_result = [""] * len(words)
+                if indices:
+                    batch = [hiragana[i] for i in indices]
+                    batch_phonemes = phonemize(
+                        batch,
+                        language=self.config.language,
+                        backend="espeak",
+                        strip=True,
+                        preserve_punctuation=False,
+                        with_stress=True,
+                    )
+                    for i, ph in zip(indices, batch_phonemes):
+                        ph_result[i] = str(ph)
+                self._phonemizer_available = True
+                return ph_result
 
             phonemes = phonemize(
                 words,

@@ -21,6 +21,7 @@ dependencies = [
     "torch",
     "torchaudio",
     "python-levenshtein",
+    "pykakasi>=2.3.0",
 ]
 
 [tool.uv.sources]

@@ -3,10 +3,21 @@ import httpx
 from app.config import OllamaConfig
 from app.services.llm.base import LLMService
 
-LANG_NAMES = {
+REPLY_LANG_NAMES = {
     "zh-CN": "Simplified Chinese",
     "zh-TW": "Traditional Chinese",
     "en": "English",
+    "ja": "Japanese",
+    "ko": "Korean",
+    "fr": "French",
+    "de": "German",
+}
+
+SOURCE_LANG_NAMES = {
+    "en": "English",
+    "fr": "French",
+    "de": "German",
+    "ja": "Japanese",
 }
 
 
@@ -29,11 +40,13 @@ class OllamaLLMService(LLMService):
         resp.raise_for_status()
         return resp.json()["message"]["content"].strip()
 
-    def analyze(self, text: str, reply_lang: str = "zh-CN") -> str:
-        lang = LANG_NAMES.get(reply_lang, reply_lang)
+    def analyze(self, text: str, reply_lang: str = "zh-CN", source_lang: str = "en") -> str:
+        reply = REPLY_LANG_NAMES.get(reply_lang, reply_lang)
+        source = SOURCE_LANG_NAMES.get(source_lang, source_lang)
         system = (
-            f"You are an English teacher. Analyze the English sentence the user provides. "
-            f"Reply entirely in {lang}, including the section headings. "
+            f"You are a language teacher specializing in {source}. "
+            f"Analyze the {source} sentence the user provides. "
+            f"Reply entirely in {reply}, including the section headings. "
             f"Output ONLY three markdown sections (## heading), covering: sentence structure, grammar points, key vocabulary. "
             f"No text outside the three sections."
         )
