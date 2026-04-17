@@ -37,6 +37,7 @@
 | 영어 | `en` | `en` | `en-us` |
 | 프랑스어 | `fr` | `fr` | `fr-fr` |
 | 독일어 | `de` | `de` | `de` |
+| 일본어 | `ja` | `ja` | `ja` |
 
 > 음소 채점 모델은 모든 언어에 공통으로 [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft)를 사용합니다. 정렬 모델은 whisperx가 첫 사용 시 자동으로 다운로드합니다.
 

@@ -37,6 +37,7 @@
 | 英語 | `en` | `en` | `en-us` |
 | フランス語 | `fr` | `fr` | `fr-fr` |
 | ドイツ語 | `de` | `de` | `de` |
+| 日本語 | `ja` | `ja` | `ja` |
 
 > 音素スコアリングモデルは全言語共通 [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft)。アライメントモデルは whisperx が初回使用時に自動ダウンロードします。
 

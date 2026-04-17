@@ -37,6 +37,7 @@
 | 英语 | `en` | `en` | `en-us` |
 | 法语 | `fr` | `fr` | `fr-fr` |
 | 德语 | `de` | `de` | `de` |
+| 日语 | `ja` | `ja` | `ja` |
 
 > 音素评分模型所有语言共用 [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft)。对齐模型由 whisperx 在首次使用时自动下载。
 

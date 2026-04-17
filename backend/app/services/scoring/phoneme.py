@@ -25,7 +25,7 @@ class PhonemeScoringService(ScoringService):
 
     @staticmethod
     def _display_word(word: str) -> str:
-        return re.sub(r"(^[^A-Za-z']+|[^A-Za-z']+$)", "", word)
+        return re.sub(r"(^\W+|\W+$)", "", word)
 
     @classmethod
     def _reference_words(cls, reference_text: str) -> list[str]:
@@ -38,7 +38,7 @@ class PhonemeScoringService(ScoringService):
 
     @staticmethod
     def _normalize_text(text: str) -> str:
-        return re.sub(r"[^A-Za-z']", "", text).lower()
+        return re.sub(r"[^\w']", "", text).lower()
 
     _STRESS_RE = re.compile(r"[ˈˌ]")
 
@@ -128,7 +128,7 @@ class PhonemeScoringService(ScoringService):
 
             phonemes = phonemize(
                 words,
-                language="en-us",
+                language=self.config.language,
                 backend="espeak",
                 strip=True,
                 preserve_punctuation=False,

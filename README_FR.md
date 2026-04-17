@@ -37,6 +37,7 @@
 | Anglais | `en` | `en` | `en-us` |
 | Français | `fr` | `fr` | `fr-fr` |
 | Allemand | `de` | `de` | `de` |
+| Japonais | `ja` | `ja` | `ja` |
 
 Pour changer de langue d'apprentissage, définissez trois variables dans `.env` :
 

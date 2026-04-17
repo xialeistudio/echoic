@@ -37,6 +37,7 @@
 | English | `en` | `en` | `en-us` |
 | French | `fr` | `fr` | `fr-fr` |
 | German | `de` | `de` | `de` |
+| Japanese | `ja` | `ja` | `ja` |
 
 > Phoneme scoring uses [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft) for all languages. Alignment models are downloaded automatically by whisperx on first use.
 

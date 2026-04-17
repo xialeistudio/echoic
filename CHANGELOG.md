@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-04-17
+
+### Added
+- **Japanese learning support** — full pipeline (ASR → alignment → phoneme scoring) now works for Japanese (`ja`); alignment uses `jonatasgrosman/wav2vec2-large-xlsr-53-japanese` via whisperx, phoneme scoring uses espeak `ja`
+- Configure via:
+  ```env
+  ASR__WHISPERX__LANGUAGE=ja
+  ALIGNMENT__WAV2VEC2__LANGUAGE=ja
+  SCORING__PHONEME__LANGUAGE=ja
+  ```
+
+### Fixed
+- `phoneme.py` `_display_word` and `_normalize_text` regexes changed from `[^A-Za-z']` to Unicode-aware `[^\w']` so CJK characters are not stripped
+- `wav2vec2.py` text cleaning regexes updated to Unicode-aware `\W`/`\w` for consistency
+
 ## [1.4.0] - 2026-04-17
 
 ### Added

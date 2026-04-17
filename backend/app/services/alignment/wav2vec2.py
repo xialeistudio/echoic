@@ -17,37 +17,59 @@ _BUNDLE_REGISTRY = {
     "facebook/wav2vec2-large-960h": lambda: torchaudio.pipelines.WAV2VEC2_ASR_LARGE_960H,
 }
 
+# Languages routed through whisperx.align() instead of torchaudio CTC bundles
+_WHISPERX_LANGUAGES = {"ja"}
+
 
 class Wav2Vec2AlignmentService(AlignmentService):
     def __init__(self, config: Wav2Vec2AlignmentConfig):
         self.config = config
-        if config.model_id not in _BUNDLE_REGISTRY:
-            raise ValueError(
-                f"Unsupported alignment model: {config.model_id}. "
-                f"Supported: {list(_BUNDLE_REGISTRY)}"
-            )
-        self._bundle = _BUNDLE_REGISTRY[config.model_id]()
-        self._sample_rate = self._bundle.sample_rate
-        self._labels = self._bundle.get_labels()
-        self._label_to_token = {label: index for index, label in enumerate(self._labels)}
-        self._blank = self._label_to_token["-"]
-        self._model = self._bundle.get_model().eval()
-        self._model_device = "cpu"
-        self._move_model(config.device)
+
+        if config.language in _WHISPERX_LANGUAGES:
+            self._use_whisperx = True
+            self._wx_model = None
+            self._wx_metadata = None
+            self._load_whisperx_model()
+        else:
+            self._use_whisperx = False
+            if config.model_id not in _BUNDLE_REGISTRY:
+                raise ValueError(
+                    f"Unsupported alignment model: {config.model_id}. "
+                    f"Supported: {list(_BUNDLE_REGISTRY)}"
+                )
+            self._bundle = _BUNDLE_REGISTRY[config.model_id]()
+            self._sample_rate = self._bundle.sample_rate
+            self._labels = self._bundle.get_labels()
+            self._label_to_token = {label: index for index, label in enumerate(self._labels)}
+            self._blank = self._label_to_token["-"]
+            self._model = self._bundle.get_model().eval()
+            self._model_device = "cpu"
+            self._move_model(config.device)
+
+    def _load_whisperx_model(self) -> None:
+        import whisperx
+        self._wx_model, self._wx_metadata = whisperx.load_align_model(
+            language_code=self.config.language,
+            device=self.config.device,
+        )
+
+    # text helpers (Unicode-aware, works for Latin and CJK)
 
     @staticmethod
     def _display_word(word: str) -> str:
-        return re.sub(r"(^[^A-Za-z']+|[^A-Za-z']+$)", "", word)
+        return re.sub(r"(^\W+|\W+$)", "", word)
 
     @classmethod
     def _reference_words(cls, reference_text: str) -> list[tuple[str, str]]:
         words = []
         for part in reference_text.split():
             display = cls._display_word(part)
-            normalized = re.sub(r"[^A-Za-z']", "", display).upper()
+            normalized = re.sub(r"[^\w']", "", display).upper()
             if normalized:
                 words.append((display, normalized))
         return words
+
+    # torchaudio CTC path (English / Latin-script languages)
 
     @staticmethod
     def _target_tokens(words: list[tuple[str, str]]) -> tuple[list[str], list[int | None]]:
@@ -150,7 +172,39 @@ class Wav2Vec2AlignmentService(AlignmentService):
         seconds_per_frame = waveform.shape[1] / self._sample_rate / log_probs.shape[1]
         return self._word_spans(words, transcript_chars, char_to_word, token_spans, seconds_per_frame)
 
+    # whisperx path (Japanese and other HuggingFace-model languages)
+
+    def _whisperx_align(self, audio_path: str, reference_text: str) -> list[WordTimestamp]:
+        import whisperx
+
+        audio = whisperx.load_audio(audio_path)
+        duration = len(audio) / 16000.0
+        segments = [{"start": 0.0, "end": duration, "text": reference_text}]
+
+        result = whisperx.align(
+            segments,
+            self._wx_model,
+            self._wx_metadata,
+            audio,
+            self.config.device,
+            return_char_alignments=False,
+        )
+
+        aligned_words = []
+        for ws in result.get("word_segments", []):
+            word = str(ws.get("word", "")).strip()
+            start = ws.get("start")
+            end = ws.get("end")
+            if word and start is not None and end is not None:
+                aligned_words.append(WordTimestamp(word=word, start=float(start), end=float(end)))
+        return aligned_words
+
+    # public entry point
+
     def align(self, audio_path: str, reference_text: str) -> list[WordTimestamp]:
+        if self._use_whisperx:
+            return self._whisperx_align(audio_path, reference_text)
+
         waveform = self._load_waveform(audio_path)
         try:
             return self._align_on_device(waveform, reference_text, self.config.device)

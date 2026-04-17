@@ -22,6 +22,7 @@ class ASRConfig(BaseModel):
 class Wav2Vec2AlignmentConfig(BaseModel):
     model_id: str = "facebook/wav2vec2-base-960h"
     device: str = "cpu"
+    language: str = "en"
 
 
 class AlignmentConfig(BaseModel):
@@ -35,6 +36,7 @@ class PhonemeScoringConfig(BaseModel):
     # wav2vec2 model for phoneme recognition
     phoneme_model_id: str = "facebook/wav2vec2-lv-60-espeak-cv-ft"
     device: str = "cpu"
+    language: str = "en-us"          # espeak language code
     # weights for the three dimensions
     accuracy_weight: float = 0.5
     fluency_weight: float = 0.3
