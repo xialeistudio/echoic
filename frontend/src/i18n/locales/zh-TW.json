@@ -5,7 +5,8 @@
     "settings": "設定",
     "gallery": "內容廣場",
     "expandSidebar": "展開側邊欄",
-    "collapseSidebar": "收起側邊欄"
+    "collapseSidebar": "收起側邊欄",
+    "oral": "口語練習"
   },
   "overview": {
     "title": "概覽",
@@ -123,8 +124,25 @@
     "completeness": "完整度"
   },
   "heatmap": {
-    "months": ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
-    "weekdays": ["一","三","五"],
+    "months": [
+      "1月",
+      "2月",
+      "3月",
+      "4月",
+      "5月",
+      "6月",
+      "7月",
+      "8月",
+      "9月",
+      "10月",
+      "11月",
+      "12月"
+    ],
+    "weekdays": [
+      "一",
+      "三",
+      "五"
+    ],
     "less": "少",
     "more": "多",
     "noPractice": "暫無練習",
@@ -185,5 +203,59 @@
     "fr-FR": "法語 (fr-FR)",
     "de-DE": "德語 (de-DE)",
     "es-ES": "西班牙語 (es-ES)"
+  },
+  "oral": {
+    "title": "口語練習",
+    "subtitle": "LLM-generated questions in any language",
+    "recentAttempts": "Recent Attempts",
+    "generateQuestion": "Generate Question",
+    "switchQuestion": "New Question",
+    "nextQuestion": "Practice Again",
+    "generating": "Generating…",
+    "tapGenerate": "Tap below to generate a question",
+    "startRecording": "Start Recording",
+    "stopRecording": "Stop Recording",
+    "scoring": "Scoring…",
+    "timerOn": "倒數計時",
+    "timerOff": "倒數計時",
+    "seconds": "s",
+    "waitingMic": "Waiting…",
+    "contentScore": "Content",
+    "transcript": "Transcript",
+    "pictureDesc": "Picture description",
+    "scoringNote": "* Pronunciation score based on speech recognition",
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "types": {
+      "read_aloud": {
+        "name": "Read Aloud",
+        "desc": "Read text aloud"
+      },
+      "situational": {
+        "name": "Situational",
+        "desc": "Situational task"
+      },
+      "picture_describe": {
+        "name": "Picture Description",
+        "desc": "Describe a scene"
+      },
+      "quick_response": {
+        "name": "Quick Response",
+        "desc": "Short spoken answer"
+      },
+      "monologue": {
+        "name": "Monologue",
+        "desc": "Speak on a topic"
+      }
+    },
+    "placeholderReadAloud": "輸入或貼上要朗讀的文字，也可點擊 AI 生成",
+    "placeholderPrompt": "自行輸入題目或任務，也可點擊 AI 生成",
+    "regenerate": "重新生成",
+    "practiceAgain": "再練一次",
+    "submitScore": "提交評分",
+    "reRecord": "重錄"
   }
 }

@@ -253,13 +253,23 @@ _REGISTRY: dict[str, Callable[[], LanguagePhonemizerBackend]] = {
     "ja": JapaneseBackend,
 }
 
+# Map short ISO-639-1 codes (used by oral practice) to espeak language codes.
+# Only entries that differ from the espeak code need to be listed here.
+_ESPEAK_CODE_MAP: dict[str, str] = {
+    "en": "en-us",
+    "zh": "cmn",
+    "fr": "fr-fr",
+}
+
 
 def get_backend(language: str) -> LanguagePhonemizerBackend:
     """Return the appropriate backend for *language*.
 
     Languages not in the registry use :class:`LatinScriptBackend`.
+    Short ISO-639-1 codes are mapped to the appropriate espeak code first.
     """
     factory = _REGISTRY.get(language)
     if factory is not None:
         return factory()
-    return LatinScriptBackend(language)
+    espeak_lang = _ESPEAK_CODE_MAP.get(language, language)
+    return LatinScriptBackend(espeak_lang)

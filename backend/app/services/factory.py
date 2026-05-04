@@ -7,22 +7,40 @@ from app.services.scoring.base import ScoringService
 from app.services.storage.base import StorageService
 
 
-@lru_cache
-def get_asr_service() -> ASRService:
+@lru_cache(maxsize=None)
+def get_asr_service(language: str | None = None) -> ASRService:
     match settings.asr.backend:
         case "whisperx":
             from app.services.asr.whisperx import WhisperXASRService
-            return WhisperXASRService(settings.asr.whisperx)
+            from app.config import WhisperXConfig
+            if language is None or language == settings.asr.whisperx.language:
+                return WhisperXASRService(settings.asr.whisperx)
+            config = WhisperXConfig(
+                model_size=settings.asr.whisperx.model_size,
+                device=settings.asr.whisperx.device,
+                compute_type=settings.asr.whisperx.compute_type,
+                language=language,
+                batch_size=settings.asr.whisperx.batch_size,
+            )
+            return WhisperXASRService(config)
         case _:
             raise ValueError(f"Unknown ASR backend: {settings.asr.backend}")
 
 
-@lru_cache
-def get_alignment_service() -> AlignmentService:
+@lru_cache(maxsize=None)
+def get_alignment_service(language: str | None = None) -> AlignmentService:
     match settings.alignment.backend:
         case "wav2vec2":
             from app.services.alignment.wav2vec2 import Wav2Vec2AlignmentService
-            return Wav2Vec2AlignmentService(settings.alignment.wav2vec2)
+            from app.config import Wav2Vec2AlignmentConfig
+            if language is None or language == settings.alignment.wav2vec2.language:
+                return Wav2Vec2AlignmentService(settings.alignment.wav2vec2)
+            config = Wav2Vec2AlignmentConfig(
+                model_id=settings.alignment.wav2vec2.model_id,
+                device=settings.alignment.wav2vec2.device,
+                language=language,
+            )
+            return Wav2Vec2AlignmentService(config)
         case _:
             raise ValueError(f"Unknown alignment backend: {settings.alignment.backend}")
 

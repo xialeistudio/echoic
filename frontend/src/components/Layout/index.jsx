@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { LayoutDashboard, Mic, Settings, PanelLeftClose, PanelLeftOpen, AudioWaveform, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Mic, Mic2, Settings, PanelLeftClose, PanelLeftOpen, AudioWaveform, BookOpen } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, key: 'nav.overview', end: true },
   { to: '/speaking', icon: Mic, key: 'nav.speaking' },
+  { to: '/oral', icon: Mic2, key: 'nav.oral' },
   { to: '/gallery', icon: BookOpen, key: 'nav.gallery' },
   { to: '/settings', icon: Settings, key: 'nav.settings' },
 ]

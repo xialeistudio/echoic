@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-05-04
+
+### Added
+- **Oral Practice module** — dedicated speaking practice with three question types:
+  - **Read Aloud** — LLM generates a passage; phoneme-level scoring (accuracy, fluency, completeness) via forced alignment against the reference text
+  - **Situational** — LLM generates a scenario prompt; ASR transcription + LLM content scoring (score, feedback, highlights)
+  - **Monologue** — open-ended topic speaking; same ASR + LLM scoring pipeline
+- **Multi-language oral practice** — language-specific ASR, alignment, and phoneme-scoring services are created and cached per practice language; supports en, ja, ko, fr, de, es, it, pt, ru (language-specific alignment models downloaded automatically by whisperx on first use)
+- **Stop → Review → Score / Re-record** — stopping a recording no longer immediately submits; a confirmation step lets users re-record unsatisfactory takes before scoring
+- **Breadcrumb navigation** for inner practice pages (`Oral Practice › Read Aloud`)
+- **Recent attempts** panel on the oral home page with score and timestamp per attempt
+
+### Fixed
+- Oral practice scores were all zero when the practice language differed from the backend's configured language (`SCORING__PHONEME__LANGUAGE`): scoring now selects a language-appropriate phonemizer backend per request
+- Language code mapping added for espeak: `en → en-us`, `fr → fr-fr`, `zh → cmn`
+- Fluency score formula normalised by word count (previously cumulative penalty caused multi-word passages to score near zero)
+- Alignment falls back gracefully (scores all reference words via CTC forced alignment) when word-level alignment is unavailable for a given language
+
+### Changed
+- Removed **Picture Description** and **Quick Response** practice types (incomplete implementation)
+- Oral practice now supports **en, ja, ko, fr, de, es, it, pt, ru** without any `.env` change — language is selected per session in the UI
+- Top-level pages (Oral Practice home, Settings, Gallery) no longer show a redundant title header; page context is conveyed by the sidebar
+- Gallery and Settings page title styling unified with the rest of the app
+
 ## [1.5.0] - 2026-04-17
 
 ### Added

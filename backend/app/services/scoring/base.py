@@ -22,6 +22,7 @@ class ScoringService(ABC):
         recording_path: str,
         reference_text: str,
         aligned_words: list[WordTimestamp],
+        language: str | None = None,
     ) -> ScoringResult:
         """
         Score a user recording against the reference sentence.

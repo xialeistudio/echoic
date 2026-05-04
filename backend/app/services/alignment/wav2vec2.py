@@ -18,7 +18,10 @@ _BUNDLE_REGISTRY = {
 }
 
 # Languages routed through whisperx.align() instead of torchaudio CTC bundles
-_WHISPERX_LANGUAGES = {"ja"}
+# English uses the torchaudio CTC path (faster, trained on English LibriSpeech).
+# Everything else uses whisperx, which downloads a language-specific wav2vec2
+# alignment model from HuggingFace on first use (~400 MB, then cached).
+_WHISPERX_LANGUAGES = {"ja", "ko", "fr", "de", "es", "it", "pt", "ru"}
 
 
 class Wav2Vec2AlignmentService(AlignmentService):

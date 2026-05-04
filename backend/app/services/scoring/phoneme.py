@@ -1,3 +1,4 @@
+import logging
 import math
 import os
 import re
@@ -12,6 +13,8 @@ from app.schemas.audio import WordTimestamp
 from app.schemas.practice import WordScore
 from app.services.scoring.backends import get_backend
 from app.services.scoring.base import ScoringResult, ScoringService
+
+logger = logging.getLogger(__name__)
 
 
 class PhonemeScoringService(ScoringService):
@@ -64,7 +67,8 @@ class PhonemeScoringService(ScoringService):
             for previous, current in zip(aligned_words, aligned_words[1:])
         ]
         excess_pause = sum(max(0.0, gap - 0.25) for gap in gaps)
-        gap_score = max(0.0, 100.0 - excess_pause * 120.0)
+        avg_excess = excess_pause / len(gaps)
+        gap_score = max(0.0, 100.0 - avg_excess * 120.0)
 
         words_per_second = len(aligned_words) / total_duration
         rate_score = max(0.0, 100.0 - abs(words_per_second - 2.5) / 2.5 * 50.0)
@@ -181,13 +185,16 @@ class PhonemeScoringService(ScoringService):
 
         try:
             log_probs = self._get_log_probs(waveform, device)
-        except (NotImplementedError, RuntimeError):
+        except (NotImplementedError, RuntimeError) as e:
             if device != "mps":
+                logger.warning("get_log_probs failed (device=%s): %s", device, e)
                 return zero_word, zero_ph
             log_probs = self._get_log_probs(waveform, "cpu")
 
         token_ids, word_lengths = self._phonemes_to_tokens(expected_phonemes)
+        logger.debug("Phonemes: %s → token_ids count=%d word_lengths=%s", expected_phonemes, len(token_ids), word_lengths)
         if not token_ids:
+            logger.warning("No token IDs produced from phonemes — all scores will be 0. Phonemes: %s", expected_phonemes)
             return zero_word, zero_ph
 
         blank = self._processor.tokenizer.pad_token_id
@@ -203,7 +210,8 @@ class PhonemeScoringService(ScoringService):
                 target_lengths=target_lengths,
                 blank=blank,
             )
-        except Exception:
+        except Exception as e:
+            logger.warning("forced_align failed: %s", e)
             return zero_word, zero_ph
 
         token_spans = torchaudio.functional.merge_tokens(
@@ -242,12 +250,16 @@ class PhonemeScoringService(ScoringService):
         recording_path: str,
         reference_text: str,
         aligned_words: list[WordTimestamp],
+        language: str | None = None,
     ) -> ScoringResult:
         reference_words = self._reference_words(reference_text)
-        # IPA for CTC alignment scoring; display format (romaji/IPA) for the UI
-        ipa_phonemes = self._phonemize_words(reference_words)
-        display_phonemes = self._backend.display(reference_words)
+        # Use a language-appropriate backend when the caller specifies a language
+        # (e.g. oral practice with English when the singleton was configured for Japanese)
+        backend = get_backend(language) if language else self._backend
+        ipa_phonemes = backend.phonemize(reference_words)
+        display_phonemes = backend.display(reference_words)
         matched_words = self._match_reference_to_aligned(reference_words, aligned_words)
+        alignment_available = any(m is not None for m in matched_words)
 
         waveform, sample_rate = self._load_waveform(recording_path)
         if sample_rate != 16000:
@@ -256,8 +268,12 @@ class PhonemeScoringService(ScoringService):
         all_word_acc = [0.0] * len(reference_words)
         all_ph_scores: list[list[float]] = [[] for _ in reference_words]
 
-        if self._load_model() and matched_words:
-            present_indices = [i for i, m in enumerate(matched_words) if m is not None]
+        if self._load_model() and reference_words:
+            if alignment_available:
+                present_indices = [i for i, m in enumerate(matched_words) if m is not None]
+            else:
+                # Alignment unavailable (e.g. language mismatch); score all reference words
+                present_indices = list(range(len(reference_words)))
             present_phonemes = [ipa_phonemes[i] for i in present_indices]
             if present_phonemes:
                 try:
@@ -287,7 +303,6 @@ class PhonemeScoringService(ScoringService):
             sum(all_word_acc) / len(all_word_acc) if all_word_acc else 100.0
         )
 
-        # Only count words with accuracy >= 15 as actually spoken
         SPOKEN_THRESHOLD = 15.0
         spoken_count = sum(1 for acc in all_word_acc if acc >= SPOKEN_THRESHOLD)
         completeness_score = (
@@ -295,12 +310,21 @@ class PhonemeScoringService(ScoringService):
             if reference_words else 100.0
         )
 
-        # Fluency only from words that were actually spoken
-        spoken_aligned = [
-            w for w, acc in zip(matched_words, all_word_acc)
-            if w is not None and acc >= SPOKEN_THRESHOLD
-        ]
-        fluency_score = self._fluency_score(spoken_aligned)
+        if alignment_available:
+            spoken_aligned = [
+                w for w, acc in zip(matched_words, all_word_acc)
+                if w is not None and acc >= SPOKEN_THRESHOLD
+            ]
+            fluency_score = self._fluency_score(spoken_aligned)
+        else:
+            # Estimate fluency from recording duration vs expected speaking pace
+            duration = waveform.shape[-1] / 16000.0
+            if duration > 0 and reference_words:
+                wps = len(reference_words) / max(duration, 0.1)
+                rate_score = max(0.0, 100.0 - abs(wps - 2.5) / 2.5 * 50.0)
+                fluency_score = max(0.0, min(100.0, rate_score))
+            else:
+                fluency_score = 0.0
 
         return ScoringResult(
             accuracy_score=accuracy_score,

@@ -12,6 +12,10 @@
 
 ## Features
 
+- **Oral Practice** — AI-driven speaking drills in three modes:
+  - *Read Aloud* — phoneme-level accuracy, fluency, and completeness scored against a reference passage
+  - *Situational* — respond to an AI-generated scenario; LLM evaluates content, relevance, and expression
+  - *Monologue* — speak freely on a given topic for about one minute; LLM scores and gives feedback
 - **Content Gallery** — Browse and import curated episodes from VOA Learning English and BBC Learning English
 - **Audio Import** — Upload local files or import from any direct audio URL
 - **Collections** — Organise audio into named collections
@@ -27,10 +31,14 @@
 - **Practice Heatmap** — 365-day activity calendar on the overview page
 - **Keyboard Shortcuts** — Space / R / Enter / ←→ / Esc for hands-free practice flow
 - **Dark Mode** — Light, dark, and system-follow themes
-- **Multi-language Learning** — Practice English, French, and German; phoneme scoring adapts per language
+- **Multi-language Learning** — Practice English, Japanese, Korean, French, German, Spanish, Italian, Portuguese, Russian; phoneme scoring adapts per language automatically
 - **Multilingual UI** — English, Simplified Chinese, Traditional Chinese, Japanese, Korean, French, German
 
 ## Supported Learning Languages
+
+### Sentence Practice (audio library)
+
+Configure a single primary language in `.env`:
 
 | Language | `ASR__WHISPERX__LANGUAGE` | `ALIGNMENT__WAV2VEC2__LANGUAGE` | `SCORING__PHONEME__LANGUAGE` |
 |---|---|---|---|
@@ -39,15 +47,13 @@
 | German | `de` | `de` | `de` |
 | Japanese | `ja` | `ja` | `ja` |
 
-> Phoneme scoring uses [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft) for all languages. Alignment models are downloaded automatically by whisperx on first use.
+### Oral Practice
 
-To switch learning language, set three variables in `.env`:
+Language is selected **per session** in the UI — no `.env` change required. Supported: English, Japanese, Korean, French, German, Spanish, Italian, Portuguese, Russian.
 
-```env
-ASR__WHISPERX__LANGUAGE=fr
-ALIGNMENT__WAV2VEC2__LANGUAGE=fr
-SCORING__PHONEME__LANGUAGE=fr-fr
-```
+Language-specific ASR and alignment models are downloaded automatically on first use (~400 MB each) and cached permanently.
+
+> Phoneme scoring uses [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft) for all languages.
 
 ## Tech Stack
 

@@ -2,10 +2,65 @@
   "nav": {
     "overview": "Overview",
     "speaking": "Speaking",
+    "oral": "Oral Practice",
     "settings": "Settings",
     "gallery": "Gallery",
     "expandSidebar": "Expand sidebar",
     "collapseSidebar": "Collapse sidebar"
+  },
+  "oral": {
+    "title": "Oral Practice",
+    "subtitle": "Pick a question type — LLM generates a fresh question in any language",
+    "recentAttempts": "Recent Attempts",
+    "generateQuestion": "Generate Question",
+    "switchQuestion": "New Question",
+    "nextQuestion": "Practice Again",
+    "generating": "Generating question…",
+    "tapGenerate": "Tap the button below to generate a question",
+    "startRecording": "Start Recording",
+    "stopRecording": "Stop Recording",
+    "scoring": "Scoring…",
+    "timerOn": "Countdown",
+    "timerOff": "Countdown",
+    "seconds": "s",
+    "waitingMic": "Waiting for recording…",
+    "contentScore": "Content",
+    "transcript": "Transcript",
+    "pictureDesc": "Picture description (reference)",
+    "scoringNote": "* Pronunciation score is based on speech recognition; severe mispronunciation may affect accuracy",
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "types": {
+      "read_aloud": {
+        "name": "Read Aloud",
+        "desc": "Read LLM-generated text aloud — scored on pronunciation accuracy and fluency"
+      },
+      "situational": {
+        "name": "Situational",
+        "desc": "Form a question or complete a communicative task for a given scenario"
+      },
+      "picture_describe": {
+        "name": "Picture Description",
+        "desc": "Describe a scene and share your opinion in the target language"
+      },
+      "quick_response": {
+        "name": "Quick Response",
+        "desc": "Give a concise, accurate spoken answer to a question"
+      },
+      "monologue": {
+        "name": "Monologue",
+        "desc": "Speak for about one minute on a given topic"
+      }
+    },
+    "placeholderReadAloud": "Type or paste the text you want to read aloud, or generate one with AI",
+    "placeholderPrompt": "Type your own question or task, or generate one with AI",
+    "regenerate": "Regenerate",
+    "practiceAgain": "Practice Again",
+    "submitScore": "Submit & Score",
+    "reRecord": "Re-record"
   },
   "overview": {
     "title": "Overview",
@@ -123,8 +178,25 @@
     "completeness": "Completeness"
   },
   "heatmap": {
-    "months": ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-    "weekdays": ["Mon","Wed","Fri"],
+    "months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+    "weekdays": [
+      "Mon",
+      "Wed",
+      "Fri"
+    ],
     "less": "Less",
     "more": "More",
     "noPractice": "No practice",
@@ -143,6 +215,8 @@
     "appLangDesc": "Display language for the app",
     "nativeLang": "Native Language",
     "nativeLangDesc": "Analysis will reply in this language",
+    "practiceLang": "Practice Language",
+    "practiceLangDesc": "Target language for oral practice (can be overridden per session)",
     "shortcuts": "Keyboard Shortcuts",
     "shortcut": {
       "playPause": "Play / pause original audio",

@@ -12,6 +12,10 @@
 
 ## 功能特性
 
+- **口语练习** — AI 驱动的口语训练，三种模式：
+  - *朗读* — 朗读 AI 生成的段落，获得音素级准确度、流利度、完整度评分
+  - *情景提问* — 针对 AI 生成的情景作答，LLM 评估内容、相关性和表达
+  - *话题演讲* — 围绕给定话题自由表达约一分钟，LLM 评分并给出反馈
 - **内容广场** — 浏览并导入 VOA Learning English、BBC Learning English 精选节目
 - **音频导入** — 上传本地文件或从任意直链 URL 导入
 - **合集管理** — 将音频整理到自定义合集
@@ -27,10 +31,14 @@
 - **练习热力图** — 365 天练习活跃度日历
 - **键盘快捷键** — 空格 / R / 回车 / ←→ / Esc 全程键盘操作
 - **深色模式** — 浅色、深色、跟随系统三选一
-- **多语种练习** — 支持英语、法语、德语学习；发音评分按语言自动适配
+- **多语种练习** — 支持英语、日语、韩语、法语、德语、西班牙语、意大利语、葡萄牙语、俄语；发音评分按语言自动适配
 - **多语言界面** — 简体中文、繁体中文、英文、日语、韩语、法语、德语
 
 ## 支持的练习语言
+
+### 逐句练习（音频库）
+
+在 `.env` 中配置一种主语言：
 
 | 语言 | `ASR__WHISPERX__LANGUAGE` | `ALIGNMENT__WAV2VEC2__LANGUAGE` | `SCORING__PHONEME__LANGUAGE` |
 |---|---|---|---|
@@ -39,15 +47,13 @@
 | 德语 | `de` | `de` | `de` |
 | 日语 | `ja` | `ja` | `ja` |
 
-> 音素评分模型所有语言共用 [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft)。对齐模型由 whisperx 在首次使用时自动下载。
+### 口语练习
 
-切换练习语言只需在 `.env` 中设置三个变量：
+语言在 UI 中**按会话选择**，无需修改 `.env`。支持：英语、日语、韩语、法语、德语、西班牙语、意大利语、葡萄牙语、俄语。
 
-```env
-ASR__WHISPERX__LANGUAGE=fr
-ALIGNMENT__WAV2VEC2__LANGUAGE=fr
-SCORING__PHONEME__LANGUAGE=fr-fr
-```
+各语言的 ASR 和对齐模型在首次使用时自动下载（约 400 MB），永久缓存。
+
+> 音素评分所有语言共用 [`facebook/wav2vec2-lv-60-espeak-cv-ft`](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft)。
 
 ## 技术栈
 

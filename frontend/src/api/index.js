@@ -53,6 +53,32 @@ export const statsApi = {
   getRecent: (limit = 20) => api.get(`/stats/recent?limit=${limit}`),
 }
 
+export const oralApi = {
+  generateQuestion: ({ questionType, language, difficulty = 'intermediate', topic } = {}) => {
+    const params = new URLSearchParams({ question_type: questionType, language, difficulty })
+    if (topic) params.set('topic', topic)
+    return api.post(`/oral/questions/generate?${params}`)
+  },
+  submitAttempt: ({ questionType, questionLanguage, questionPrompt, questionDifficulty, questionReference, timerSecs, blob }) => {
+    const form = new FormData()
+    form.append('file', blob, 'oral_recording.webm')
+    form.append('question_type', questionType)
+    form.append('question_language', questionLanguage)
+    form.append('question_prompt', questionPrompt)
+    if (questionDifficulty) form.append('question_difficulty', questionDifficulty)
+    if (questionReference) form.append('question_reference', questionReference)
+    if (timerSecs != null) form.append('timer_secs', timerSecs)
+    return api.post('/oral/attempts', form)
+  },
+  listAttempts: ({ questionType, limit = 20 } = {}) => {
+    const params = new URLSearchParams({ limit })
+    if (questionType) params.set('question_type', questionType)
+    return api.get(`/oral/attempts?${params}`)
+  },
+  getAttempt: (id) => api.get(`/oral/attempts/${id}`),
+  attemptStreamUrl: (id) => `/api/oral/attempts/${id}/stream`,
+}
+
 export const galleryApi = {
   list: ({ source, level, program } = {}) => {
     const params = new URLSearchParams()

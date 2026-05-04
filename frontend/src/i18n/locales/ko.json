@@ -5,7 +5,8 @@
     "settings": "설정",
     "gallery": "콘텐츠",
     "expandSidebar": "사이드바 펼치기",
-    "collapseSidebar": "사이드바 접기"
+    "collapseSidebar": "사이드바 접기",
+    "oral": "구술 연습"
   },
   "overview": {
     "title": "개요",
@@ -123,8 +124,25 @@
     "completeness": "완성도"
   },
   "heatmap": {
-    "months": ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"],
-    "weekdays": ["월","수","금"],
+    "months": [
+      "1월",
+      "2월",
+      "3월",
+      "4월",
+      "5월",
+      "6월",
+      "7월",
+      "8월",
+      "9월",
+      "10월",
+      "11월",
+      "12월"
+    ],
+    "weekdays": [
+      "월",
+      "수",
+      "금"
+    ],
     "less": "적음",
     "more": "많음",
     "noPractice": "연습 없음",
@@ -185,5 +203,59 @@
     "fr-FR": "프랑스어 (fr-FR)",
     "de-DE": "독일어 (de-DE)",
     "es-ES": "스페인어 (es-ES)"
+  },
+  "oral": {
+    "title": "구술 연습",
+    "subtitle": "LLM-generated questions in any language",
+    "recentAttempts": "Recent Attempts",
+    "generateQuestion": "Generate Question",
+    "switchQuestion": "New Question",
+    "nextQuestion": "Practice Again",
+    "generating": "Generating…",
+    "tapGenerate": "Tap below to generate a question",
+    "startRecording": "Start Recording",
+    "stopRecording": "Stop Recording",
+    "scoring": "Scoring…",
+    "timerOn": "카운트다운",
+    "timerOff": "카운트다운",
+    "seconds": "s",
+    "waitingMic": "Waiting…",
+    "contentScore": "Content",
+    "transcript": "Transcript",
+    "pictureDesc": "Picture description",
+    "scoringNote": "* Pronunciation score based on speech recognition",
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "types": {
+      "read_aloud": {
+        "name": "Read Aloud",
+        "desc": "Read text aloud"
+      },
+      "situational": {
+        "name": "Situational",
+        "desc": "Situational task"
+      },
+      "picture_describe": {
+        "name": "Picture Description",
+        "desc": "Describe a scene"
+      },
+      "quick_response": {
+        "name": "Quick Response",
+        "desc": "Short spoken answer"
+      },
+      "monologue": {
+        "name": "Monologue",
+        "desc": "Speak on a topic"
+      }
+    },
+    "placeholderReadAloud": "낭독할 텍스트를 입력하거나 AI로 생성하세요",
+    "placeholderPrompt": "직접 질문을 입력하거나 AI로 생성하세요",
+    "regenerate": "재생성",
+    "practiceAgain": "다시 연습",
+    "submitScore": "제출 평가",
+    "reRecord": "다시 녹음"
   }
 }

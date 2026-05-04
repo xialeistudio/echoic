@@ -40,8 +40,8 @@ export default function Settings() {
   const { settings, update } = useSettings()
 
   return (
-    <div className="p-6 max-w-xl">
-      <h1 className="text-2xl font-bold mb-8">{t('settings.title')}</h1>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-auto pt-6 px-6 pb-6 max-w-xl">
 
       {/* Appearance */}
       <section className="mb-8">
@@ -96,6 +96,7 @@ export default function Settings() {
               </SelectContent>
             </Select>
           </SettingRow>
+
         </div>
       </section>
 
@@ -142,6 +143,7 @@ export default function Settings() {
           </div>
         </div>
       </section>
+      </div>
     </div>
   )
 }

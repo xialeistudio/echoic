@@ -2,10 +2,65 @@
   "nav": {
     "overview": "概览",
     "speaking": "口语",
+    "oral": "口语练习",
     "settings": "设置",
     "gallery": "内容广场",
     "expandSidebar": "展开侧边栏",
     "collapseSidebar": "收起侧边栏"
+  },
+  "oral": {
+    "title": "口语练习",
+    "subtitle": "选择题型，LLM 即时出题，支持任意语言",
+    "recentAttempts": "最近练习",
+    "generateQuestion": "生成题目",
+    "switchQuestion": "换一题",
+    "nextQuestion": "再练一题",
+    "generating": "生成题目中…",
+    "tapGenerate": "点击下方按钮生成题目",
+    "startRecording": "开始录音",
+    "stopRecording": "停止录音",
+    "scoring": "评分中…",
+    "timerOn": "倒计时",
+    "timerOff": "倒计时",
+    "seconds": "秒",
+    "waitingMic": "等待录音…",
+    "contentScore": "内容",
+    "transcript": "识别文字",
+    "pictureDesc": "图片描述（参考）",
+    "scoringNote": "* 发音评分基于语音识别结果，发音严重偏差时可能受影响",
+    "difficulty": {
+      "beginner": "初级",
+      "intermediate": "中级",
+      "advanced": "高级"
+    },
+    "types": {
+      "read_aloud": {
+        "name": "朗读",
+        "desc": "朗读 LLM 生成的句子或段落，评估发音准确度与流利度"
+      },
+      "situational": {
+        "name": "情景提问",
+        "desc": "根据情景描述，用目标语言提问或完成交际任务"
+      },
+      "picture_describe": {
+        "name": "看图说话",
+        "desc": "根据文字描述的场景，用英语描述图片内容并谈看法"
+      },
+      "quick_response": {
+        "name": "快速应答",
+        "desc": "对问题给出简洁、准确的口语回答"
+      },
+      "monologue": {
+        "name": "话题演讲",
+        "desc": "围绕给定话题进行 1 分钟左右的延伸表达"
+      }
+    },
+    "placeholderReadAloud": "输入或粘贴要朗读的文本，也可点击 AI 生成",
+    "placeholderPrompt": "自己输入题目或任务，也可点击 AI 生成",
+    "regenerate": "重新生成",
+    "practiceAgain": "再练一次",
+    "submitScore": "提交评分",
+    "reRecord": "重录"
   },
   "overview": {
     "title": "概览",
@@ -123,8 +178,25 @@
     "completeness": "完整度"
   },
   "heatmap": {
-    "months": ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
-    "weekdays": ["一","三","五"],
+    "months": [
+      "1月",
+      "2月",
+      "3月",
+      "4月",
+      "5月",
+      "6月",
+      "7月",
+      "8月",
+      "9月",
+      "10月",
+      "11月",
+      "12月"
+    ],
+    "weekdays": [
+      "一",
+      "三",
+      "五"
+    ],
     "less": "少",
     "more": "多",
     "noPractice": "暂无练习",
@@ -143,6 +215,8 @@
     "appLangDesc": "应用界面的显示语言",
     "nativeLang": "母语",
     "nativeLangDesc": "翻译和语法分析将使用此语言回复",
+    "practiceLang": "练习语言",
+    "practiceLangDesc": "口语练习的目标语言（可在练习页面临时切换）",
     "shortcuts": "键盘快捷键",
     "shortcut": {
       "playPause": "播放 / 暂停原声",

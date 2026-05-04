@@ -5,6 +5,8 @@ import AudioLibrary from './pages/AudioLibrary'
 import Practice from './pages/Practice'
 import Settings from './pages/Settings'
 import Gallery from './pages/Gallery'
+import OralHome from './pages/OralHome'
+import OralPractice from './pages/OralPractice'
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
         <Route path="/speaking" element={<AudioLibrary />} />
         <Route path="/speaking/:audioFileId" element={<Practice />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/oral" element={<OralHome />} />
+        <Route path="/oral/:type" element={<OralPractice />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </Layout>

@@ -5,7 +5,8 @@
     "settings": "Paramètres",
     "gallery": "Galerie",
     "expandSidebar": "Développer la barre latérale",
-    "collapseSidebar": "Réduire la barre latérale"
+    "collapseSidebar": "Réduire la barre latérale",
+    "oral": "Expression orale"
   },
   "overview": {
     "title": "Aperçu",
@@ -124,8 +125,25 @@
     "completeness": "Complétude"
   },
   "heatmap": {
-    "months": ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"],
-    "weekdays": ["Lun","Mer","Ven"],
+    "months": [
+      "Jan",
+      "Fév",
+      "Mar",
+      "Avr",
+      "Mai",
+      "Jun",
+      "Jul",
+      "Aoû",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Déc"
+    ],
+    "weekdays": [
+      "Lun",
+      "Mer",
+      "Ven"
+    ],
     "less": "Moins",
     "more": "Plus",
     "noPractice": "Aucune pratique",
@@ -186,5 +204,59 @@
     "fr-FR": "Français (fr-FR)",
     "de-DE": "Allemand (de-DE)",
     "es-ES": "Espagnol (es-ES)"
+  },
+  "oral": {
+    "title": "Expression orale",
+    "subtitle": "LLM-generated questions in any language",
+    "recentAttempts": "Recent Attempts",
+    "generateQuestion": "Generate Question",
+    "switchQuestion": "New Question",
+    "nextQuestion": "Practice Again",
+    "generating": "Generating…",
+    "tapGenerate": "Tap below to generate a question",
+    "startRecording": "Start Recording",
+    "stopRecording": "Stop Recording",
+    "scoring": "Scoring…",
+    "timerOn": "Compte à rebours",
+    "timerOff": "Compte à rebours",
+    "seconds": "s",
+    "waitingMic": "Waiting…",
+    "contentScore": "Content",
+    "transcript": "Transcript",
+    "pictureDesc": "Picture description",
+    "scoringNote": "* Pronunciation score based on speech recognition",
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "types": {
+      "read_aloud": {
+        "name": "Read Aloud",
+        "desc": "Read text aloud"
+      },
+      "situational": {
+        "name": "Situational",
+        "desc": "Situational task"
+      },
+      "picture_describe": {
+        "name": "Picture Description",
+        "desc": "Describe a scene"
+      },
+      "quick_response": {
+        "name": "Quick Response",
+        "desc": "Short spoken answer"
+      },
+      "monologue": {
+        "name": "Monologue",
+        "desc": "Speak on a topic"
+      }
+    },
+    "placeholderReadAloud": "Saisissez le texte a lire a voix haute ou generez-en un avec l'IA",
+    "placeholderPrompt": "Saisissez votre propre question ou generez-en une avec l'IA",
+    "regenerate": "Regenerer",
+    "practiceAgain": "Pratiquer a nouveau",
+    "submitScore": "Soumettre",
+    "reRecord": "Ré-enregistrer"
   }
 }

@@ -359,9 +359,6 @@ export default function Gallery() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-6 py-4 border-b border-border">
-        <h1 className="text-lg font-semibold">{t('gallery.title')}</h1>
-      </div>
 
       {loading && (
         <div className="flex-1 flex items-center justify-center">
