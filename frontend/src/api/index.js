@@ -13,7 +13,7 @@ export const audioApi = {
   importFromUrl: (url, title, { compress = false, collectionId = null } = {}) =>
     api.post(`/audio/from-url?compress=${compress}`, { url, title, collection_id: collectionId || null }),
   get: (audioFileId) => api.get(`/audio/${audioFileId}`),
-  list: () => api.get('/audio'),
+  list: () => api.get('/audio/'),
   rename: (audioFileId, title, language) => api.patch(`/audio/${audioFileId}`, { title, language }),
   delete: (audioFileId) => api.delete(`/audio/${audioFileId}`),
   streamUrl: (audioFileId) => `/api/audio/${audioFileId}/stream`,
@@ -41,7 +41,7 @@ export const practiceApi = {
 }
 
 export const collectionApi = {
-  list: () => api.get('/collections'),
+  list: () => api.get('/collections/'),
   create: (name) => api.post('/collections', { name }),
   rename: (id, name) => api.put(`/collections/${id}`, { name }),
   delete: (id) => api.delete(`/collections/${id}`),
@@ -86,6 +86,6 @@ export const galleryApi = {
     if (level) params.set('level', level)
     if (program) params.set('program', program)
     const qs = params.toString()
-    return api.get(`/gallery${qs ? `?${qs}` : ''}`)
+    return api.get(`/gallery/${qs ? `?${qs}` : ''}`)
   },
 }
