@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-05-19
+
+### Added
+- **Re-run ASR** — new `POST /audio/{id}/asr` endpoint re-triggers transcription on any existing audio file; exposed as a per-row button (with spinner) in the Audio Library table
+- **Smart sentence merging** — ASR pipeline now groups VAD fragments into complete sentences using punctuation detection (`_SENTENCE_END`) with a min-word guard and a max-word cap, then pads each clip with ±150 ms of silence; segment-level acoustic boundaries are used for clip edges (more accurate than word-level CTC timestamps)
+- **Score calibration** — raw CTC forced-alignment scores (typically 30–60% for correct pronunciation) are remapped via a 0.25 power transform to a more intuitive 0–100 display range (~74–88% for correct pronunciation); threshold for presence detection remains on the pre-calibration scale
+
+### Changed
+- ASR backend now uses `faster_whisper` directly (VAD filter + word timestamps enabled) instead of going through the `whisperx` wrapper; removes the `whisperx.load_align_model` call at startup and the `whisperx.align` post-processing step
+- Alignment service filters out characters absent from the model vocabulary (digits, symbols) before running CTC forced alignment, preventing silent failures on mixed-content transcripts
+
+### Fixed
+- Alignment no longer crashes on audio whose transcript contains characters outside the Wav2Vec2 vocabulary
+
 ## [1.6.0] - 2026-05-04
 
 ### Added

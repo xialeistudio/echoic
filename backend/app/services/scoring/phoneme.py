@@ -49,6 +49,20 @@ class PhonemeScoringService(ScoringService):
         return cls._STRESS_RE.sub("", phonemes)
 
     @staticmethod
+    def _calibrate(raw: float) -> float:
+        """Map raw CTC forced-alignment score (0–100) to display score (0–100).
+
+        CTC forced alignment assigns log-probs that exponentiate to 0.1–0.6
+        even for correctly pronounced phonemes, because probability mass is
+        spread across many tokens. Raising to the 0.25 power remaps the
+        typical correct-pronunciation range (~30–60%) to a more intuitive
+        range (~74–88%) while still distinguishing poor/missing phonemes.
+        """
+        if raw <= 0.0:
+            return 0.0
+        return 100.0 * (raw / 100.0) ** 0.25
+
+    @staticmethod
     def _completeness_score(reference_words: list[str], aligned_words: list[WordTimestamp]) -> float:
         if not reference_words:
             return 100.0
@@ -289,10 +303,10 @@ class PhonemeScoringService(ScoringService):
         word_scores = [
             WordScore(
                 word=ref_word,
-                accuracy_score=acc,
+                accuracy_score=self._calibrate(acc),
                 expected_phonemes=disp_ph,
                 actual_phonemes="",
-                phoneme_scores=ph,
+                phoneme_scores=[self._calibrate(p) for p in ph],
             )
             for ref_word, disp_ph, acc, ph in zip(
                 reference_words, display_phonemes, all_word_acc, all_ph_scores
@@ -300,9 +314,12 @@ class PhonemeScoringService(ScoringService):
         ]
 
         accuracy_score = (
-            sum(all_word_acc) / len(all_word_acc) if all_word_acc else 100.0
+            sum(self._calibrate(a) for a in all_word_acc) / len(all_word_acc)
+            if all_word_acc else 100.0
         )
 
+        # Use raw scores for presence detection — calibration lifts all scores,
+        # so threshold must stay on the pre-calibration scale.
         SPOKEN_THRESHOLD = 15.0
         spoken_count = sum(1 for acc in all_word_acc if acc >= SPOKEN_THRESHOLD)
         completeness_score = (

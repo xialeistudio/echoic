@@ -315,6 +315,24 @@ async def update_audio_file(
     return audio_file
 
 
+@router.post("/{audio_file_id}/asr", response_model=AudioFileResponse)
+async def rerun_asr(
+    audio_file_id: int,
+    db: Session = Depends(get_db),
+    asr: ASRService = Depends(get_asr_service),
+    storage: StorageService = Depends(get_storage_service),
+):
+    audio_file = db.get(AudioFile, audio_file_id)
+    if audio_file is None:
+        raise HTTPException(status_code=404, detail="audio file not found")
+    path = storage.get_absolute_path(audio_file.file_path)
+    sentences = await asyncio.to_thread(asr.transcribe, path)
+    audio_file.sentences = [s.model_dump() for s in sentences]
+    db.commit()
+    db.refresh(audio_file)
+    return audio_file
+
+
 @router.delete("/{audio_file_id}", status_code=204)
 async def delete_audio_file(
     audio_file_id: int,

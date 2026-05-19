@@ -147,6 +147,11 @@ class Wav2Vec2AlignmentService(AlignmentService):
             return []
 
         transcript_chars, char_to_word = self._target_tokens(words)
+        # Drop characters the model vocabulary doesn't know (e.g. digits, symbols)
+        filtered = [(c, w) for c, w in zip(transcript_chars, char_to_word) if c in self._label_to_token]
+        if not filtered:
+            return []
+        transcript_chars, char_to_word = map(list, zip(*filtered))
         targets = torch.tensor(
             [[self._label_to_token[character] for character in transcript_chars]],
             dtype=torch.int64,

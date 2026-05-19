@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, LayoutGrid, List, Pencil, Trash2, RotateCcw, FolderPlus } from 'lucide-react'
+import { Plus, Search, LayoutGrid, List, Pencil, Trash2, RotateCcw, FolderPlus, CheckCircle2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -80,6 +80,9 @@ export default function AudioLibrary() {
   // Delete dialog
   const [deleteFile, setDeleteFile] = useState(null)
 
+  // ASR re-run
+  const [asrRunning, setAsrRunning] = useState(new Set())
+
   const newColInputRef = useRef(null)
   const navigate = useNavigate()
 
@@ -141,6 +144,17 @@ export default function AudioLibrary() {
     await audioApi.delete(deleteFile.id).catch(() => {})
     setDeleteFile(null)
     load()
+  }
+
+  async function runAsr(e, f) {
+    e.stopPropagation()
+    setAsrRunning(prev => new Set(prev).add(f.id))
+    try {
+      await audioApi.rerunAsr(f.id)
+      load()
+    } finally {
+      setAsrRunning(prev => { const s = new Set(prev); s.delete(f.id); return s })
+    }
   }
 
   function applySearch() {
@@ -389,6 +403,7 @@ export default function AudioLibrary() {
                     <TableHead className="w-[70px]">{t('library.duration')}</TableHead>
                     <TableHead className="w-[90px]">{t('library.practiceCount')}</TableHead>
                     <TableHead className="w-[110px]">{t('library.updatedAt')}</TableHead>
+                    <TableHead className="w-[60px]">ASR</TableHead>
                     <TableHead className="w-[80px]">{t('library.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -405,6 +420,19 @@ export default function AudioLibrary() {
                       <TableCell className="text-muted-foreground">{formatDuration(f.duration)}</TableCell>
                       <TableCell className="text-muted-foreground">{f.practice_count ?? 0}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">{timeAgo(f.created_at, t)}</TableCell>
+                      <TableCell onClick={e => e.stopPropagation()}>
+                        <Button
+                          variant="ghost" size="icon" className="h-7 w-7"
+                          title={f.sentences?.length ? 'Re-run ASR' : 'Run ASR'}
+                          onClick={e => runAsr(e, f)}
+                          disabled={asrRunning.has(f.id)}
+                        >
+                          {asrRunning.has(f.id)
+                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            : <CheckCircle2 className={`w-3.5 h-3.5 ${f.sentences?.length ? 'text-green-500' : 'text-muted-foreground'}`} />
+                          }
+                        </Button>
+                      </TableCell>
                       <TableCell onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-0.5">
                           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => openEdit(e, f)}>

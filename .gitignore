@@ -13,3 +13,5 @@ frontend/dist/
 
 .claude/
 docker-compose.override.yml
+*.pyc
+.zed

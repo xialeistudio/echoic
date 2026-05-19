@@ -25,6 +25,7 @@ export const audioApi = {
     api.post(`/audio/${audioFileId}/sentence/${sentenceIndex}/bookmark`),
   toggleMastered: (audioFileId, sentenceIndex) =>
     api.post(`/audio/${audioFileId}/sentence/${sentenceIndex}/master`),
+  rerunAsr: (audioFileId) => api.post(`/audio/${audioFileId}/asr`),
 }
 
 export const practiceApi = {
